@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=writernote
+Comment=Take notes smart
+Exec=/usr/bin/writernote
+Icon=/usr/bin/images/icon-writernote.png
+Terminal=false
+Type=Application
+Encoding=UTF-8
+Categories=Network;Application;
+

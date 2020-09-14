@@ -1,0 +1,108 @@
+name: writernote
+version: 0.1.1
+
+summary: Writernote
+
+description: |
+  writernote is a multiplatform application that allows you to take notes by recording audio, 
+  translate it later into text, and listen to it in an intelligent way.
+
+grade: devel
+#confinement: devmode
+confinement: strict
+base: core18
+
+
+apps:
+  writernote:
+    command: desktop-launch $SNAP/bin/writernote
+    plugs:
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - opengl
+      - audio-record
+      - audio-playback
+      - home
+
+
+
+
+parts:
+  desktop-qt5:
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: qt
+    plugin: make
+    make-parameters: ["FLAVOR=qt5"]
+    build-packages:
+      - build-essential
+      - qtbase5-dev
+      - dpkg-dev
+    stage-packages:
+      - libxkbcommon0
+      - ttf-ubuntu-font-family
+      - dmz-cursor-theme
+      - light-themes
+      - adwaita-icon-theme
+      - gnome-themes-standard
+      - shared-mime-info
+      - libqt5gui5
+      - libgdk-pixbuf2.0-0
+      - libqt5svg5 # for loading icon themes which are svg
+      - try: [appmenu-qt5] # not available on core18
+      - locales-all
+      - xdg-user-dirs
+      - fcitx-frontend-qt5
+
+
+  writernote:
+    after: [desktop-qt5]
+    plugin: python
+    python-version: python3
+    source: .
+
+    
+
+    build-packages:
+      - python3
+      - python3-pyqt5
+      - execstack
+
+    stage-packages:
+      - python3
+      - libc-bin
+      - locales
+      - python3-pyqt5
+      - ffmpeg
+      - python3-tk
+      - python3-pyaudio
+      - qt5-gtk-platformtheme
+      - python3-pyqt5.qtwebengine
+      - python3-apt
+      - python3-pyqt5.qtmultimedia
+      - python3-distutils     
+      - python3-nanomsg
+      - libmpfr6
+      - libgmp10
+      - python3-opencv
+      - libqt5multimedia5-plugins
+      - libcanberra-gtk-module 
+      - libcanberra-gtk3-module
+    
+    
+    python-packages:
+      - setuptools==45.2.0
+      - wheel
+      - pydub
+      - SpeechRecognition
+      - psutil
+      - googletrans
+      - nvpy
+      #- PyQt5
+      #- multiprocessing==2.6.2.1
+      - Wave
+      - opencv-python
+      - pytesseract
+      
+  

@@ -97,8 +97,22 @@ class Ui_self(QtWidgets.QMainWindow):
         if self.path is None or self.path == '':
             self.path = os.getcwd()
 
-        with open("indice.json") as indice:
-            indice_base = json.load(indice)
+
+        try:
+            with open("indice.json") as indice:
+                indice_base = json.load(indice)
+        except FileNotFoundError:
+            ''' snapcraft PATH '''
+            path_ = QtCore.__file__.split("/")
+            path_ = path_[1:len(path_)-6]
+
+            path = '/'
+            for x in path_: 
+                path += x + "/"
+
+            print("PATH:",path)
+            with open(path + "images/indice.json") as f:
+                self.indice = json.load(f)
 
         if indice_base == self.indice:
             # It means there is no file to save

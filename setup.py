@@ -13,8 +13,7 @@ def findImages() -> list:
         for x in filenames:
             name.append("writernote/images/" + x)
     
-    finale = ['writernote.desktop', 
-            'writernote/indice.json',
+    finale = ['writernote/indice.json',
             'writernote/default_file.json',
             'writernote/config.json']
     finale.extend(name)

@@ -21,7 +21,7 @@
 </tr><tr><td>
 
 </td></tr><tr>
-</tr>/table>
+</tr></table>
 
 ## Experimental Features:
 

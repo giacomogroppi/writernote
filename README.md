@@ -15,31 +15,13 @@
 
 ## Linux
 
-<img src="readme/linux-example.png" width=100% title="Xournal++ Screenshot on Linux"/>
+<img src="readme/linux-example.png" width=100% title="writernote Screenshot on Linux"/>
 
 </td>
 </tr><tr><td>
 
-</td></tr><tr><td>
-
-## Toolbar / Page Background / Layer
-
-Multiple page background, easy selectable on the toolbar
-<img src="readme/background.png" width=100% title="Xournal++ Screenshot"/>
-
-</td><td>
-
-## Layer sidebar and advance Layer selection.
-
-<img src="readme/layer.png" width=100% title="Xournal++ Screenshot"/>
-
-</td></tr><tr><td>
-
-## Multiple predefined and fully customizable Toolbar.
-
-<img src="readme/toolbar.png" width=100% title="Xournal++ Screenshot"/>
-
-</td></tr></table>
+</td></tr><tr>
+</tr>/table>
 
 ## Experimental Features:
 

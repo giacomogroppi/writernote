@@ -7,7 +7,6 @@
 
 </td></tr></table>
 
-## Features
 
 <table>
 <tr>

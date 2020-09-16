@@ -110,9 +110,8 @@ class Ui_self(QtWidgets.QMainWindow):
             for x in path_: 
                 path += x + "/"
 
-            print("PATH:",path)
-            with open(path + "images/indice.json") as f:
-                self.indice = json.load(f)
+            with open(path + "images/indice.json") as indice:
+                indice_base = json.load(indice)
 
         if indice_base == self.indice:
             # It means there is no file to save

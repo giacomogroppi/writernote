@@ -19,7 +19,7 @@ import pyaudio
 import wave
 
 from writernote_ import zip_
-
+import shutil
 from writernote_ import audio_decoder, audioRecoder
 
 
@@ -337,34 +337,6 @@ class Ui_self(QtWidgets.QMainWindow):
             json.dump(self.indice, fileD)
 
 
-    ''' 
-    definizione di tutte le funzioni necessarie per il riascolto dinamico dell'audio
-
-    execture_this_fn --> funzione da eseguire in un thread
-    riascolto_Audio --> funzione che viene richiamata dal bottone nella gui qt
-    ''' 
-
-    '''
-    def RiascoltoFunzione(self, posizione = 0, *ciao, **arg):
-        print("RiascoltoFunzione -> start")
-        self.editor.setEnabled(False)
-        
-        time.sleep(2)
-        while True:
-            #print("\nself.currentTime{}\nself.player.duration(){}".format(self.currentTime*1000 + 800, self.player.duration()))
-            ### get the time of the reproducion
-            if self.event_stop.is_set() or self.currentTime*1000 + 800 > self.player.duration():
-                break
-            
-            self.editor.setPlainText("sto cazzo")
-            #self.editor.setText("sto cazzo")
-        
-        self.pauseButton.setEnabled(False)
-        self.playButton.setEnabled(True)
-        self.timeSlider.setEnabled(False)
-        self.volumeSlider.setEnabled(False)
-        print("RiascoltoFunzione -> finished")
-    '''
 
 
     def riascolto_Audio(self):
@@ -626,6 +598,12 @@ class Ui_self(QtWidgets.QMainWindow):
             # print(path_finale)
             if x != '': path_finale = path_finale + '/' +  x
         
+        # in this case the path change and we need to moove the temp folder
+        if self.path != path_finale:
+            print(self.path, self.temp_, path_finale)
+
+            shutil.move(self.path + "/" + self.temp_, path_finale + "/")
+
         self.path = path_finale
         #MyWindow.path = path_finale
         self.nameFile = path[len(path)-1]
@@ -676,16 +654,14 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def file_saveas(self):
         if self.path is None or self.nameFile is None:
-            self.path, _ = QFileDialog.getSaveFileName(self, "Save file", "", "Text documents (*.txt);All files (*.*)")
+            path, _ = QFileDialog.getSaveFileName(self, "Save file", "", "Text documents (*.txt);All files (*.*)")
             
-            if not self.path:
-                # If dialog is cancelled, will return ''
+            if not path:
+                # If dialog is cancelled, will return False
                 return False
 
-        self.scissionePATH(self.path)
-        
+        self.scissionePATH(path)
         self._save_to_path()
-        """ open is false becouse the user has already chose the position of the file """
 
     def createTempFolder_(self):
         """ Viene eseguita la funzione appena il programma finisce di caricare """
@@ -796,15 +772,7 @@ class Ui_self(QtWidgets.QMainWindow):
             self.dialog_critical("Reselct the name of the file please")
             return False
 
-        """ salvataggio del file di testo con i tempi degli audio """
-        # print("indice: ",self.indice)
-
         """ salvataggio degli indici """
-        ### self.indice['file']['video'] = self.video
-        ### self.indice['file']['audio'] = self.audio
-        ### self.indice['file']['titolo'] = self.titolo
-        ### self.indice['file']['compressione'] = self.compressione
-        ### self.indice['file']['file_testo'] = self.file_testo
 
         self.indice['video_checksum'] = len(self.indice['file']['titolo'])
 

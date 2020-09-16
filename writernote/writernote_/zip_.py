@@ -97,7 +97,7 @@ def compressAll(path, temp_, nameFile):
 
 def compressFolder(path, temp_, nameFile):
     import shutil
-    shutil.make_archive(path + "/" + nameFile, 'zip', temp_)
+    shutil.make_archive(path + "/" + nameFile, 'zip', path + "/" + temp_)
     
     base = os.path.splitext(path + "/" + nameFile)[0]
     os.rename(path + "/" + nameFile + ".zip", base + ".writer")
@@ -110,5 +110,5 @@ if __name__ == '__main__':
     namefile_zip = 'ciao.zip'
     namefile_to_compress = 'test.txt'
     
-    updateZip(namefile_zip, namefile_to_compress, testo)
+    #updateZip(namefile_zip, namefile_to_compress, testo)
     

@@ -32,10 +32,7 @@
     ```bash
     sudo snap install writernote --edge
     ```
-<div>
-  <iframe src="https://snapcraft.io/writernote/embedded?button=black" frameborder="0" width="100%" height="310px" style="border: 1px solid #CCC; border-radius: 2px;">
-  </iframe>
-</div>
+
 
   - Windows:
   Coming soon

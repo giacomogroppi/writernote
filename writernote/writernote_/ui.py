@@ -80,9 +80,9 @@ class Ui_self(QtWidgets.QMainWindow):
 
         if self.registrazione_:
             self.currentTitleJSON['testi'].append(text)
-            print("\n\n nuovo :")
-            for x in self.currentTitleJSON['testi']:
-                print(x)
+            #print("\n\n nuovo :")
+            #for x in self.currentTitleJSON['testi']:
+            #    print(x)
             self.currentTitleJSON['posizione_iniz'].append(str(int(time.time()) - self.tempoAudioRegistazione))
             self.currentFile = 0
         
@@ -307,6 +307,8 @@ class Ui_self(QtWidgets.QMainWindow):
             self.riascoltoAudio.setEnabled(False)
             self.deleteAudio_Button.setEnabled(False)
             
+            #non può stoppare
+            self.registrare_actionStop.setDisabled(True)
             return True
         
 
@@ -790,9 +792,8 @@ class Ui_self(QtWidgets.QMainWindow):
                     # se non è registrato
                     self.currentTitleJSON['testi'] = [self.editor.toHtml()]
                 
-                print("_save_to_path ", self.currentTitleJSON)
+                #print("_save_to_path ", self.currentTitleJSON)
                 json.dump(self.currentTitleJSON, c)
-
 
         if not zip_.compressFolder(self.path, self.temp_, self.nameFile):
             self.dialog_critical("We had a problem, retry or check the log")

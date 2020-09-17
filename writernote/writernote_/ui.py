@@ -80,6 +80,9 @@ class Ui_self(QtWidgets.QMainWindow):
 
         if self.registrazione_:
             self.currentTitleJSON['testi'].append(text)
+            print("\n\n nuovo :")
+            for x in self.currentTitleJSON['testi']:
+                print(x)
             self.currentTitleJSON['posizione_iniz'].append(str(int(time.time()) - self.tempoAudioRegistazione))
             self.currentFile = 0
         
@@ -372,16 +375,10 @@ class Ui_self(QtWidgets.QMainWindow):
         print("riascolto_Audio -> finished") 
         
 
-
-
     def compressVideo(self, currentItem):
         """ It compress the video in the saim folder """
         position = self.indice['file']['titolo'].index(currentItem.text())
-        
-        ### for i, x in enumerate(self.titolo):
-        ###     if x == currentItem.text():
-        ###         position = i
-        ###         break
+
 
 
         if self.indice['file']['compressione'][position]:
@@ -772,7 +769,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def _save_to_path(self):
         if self.nameFile is None:
-            self.dialog_critical("Reselct the name of the file please")
+            self.dialog_critical("You need to specify the name of the file please")
             return False
 
         """ salvataggio degli indici """
@@ -787,13 +784,12 @@ class Ui_self(QtWidgets.QMainWindow):
             posizione = self.indice['file']['titolo'].index(self.currentTitle)
 
             with open(self.path + "/" + self.temp_ + "/" + self.indice['file']['file_testo'][posizione] + ".json", "w") as c: 
-                if self.registrazione_:
-                    ''' deve stoppare la registrazione '''
-                    self.stopRecording()
-                else:
-                    if not self.currentTitleJSON['se_registrato']:
-                        # se non è registrato
-                        self.currentTitleJSON['testi'] = [self.editor.toHtml()]
+                if self.registrazione_: self.stopRecording()
+
+                if not self.currentTitleJSON['se_registrato'] and len(self.currentTitleJSON['testi']) < 2:
+                    # se non è registrato
+                    self.currentTitleJSON['testi'] = [self.editor.toHtml()]
+                
                 print("_save_to_path ", self.currentTitleJSON)
                 json.dump(self.currentTitleJSON, c)
 
@@ -821,8 +817,6 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def edit_toggle_wrap(self):
         self.editor.setLineWrapMode( 1 if self.editor.lineWrapMode() == 0 else 0 )
-
-
 
     def normalize(self, snd_data):
         print(snd_data)

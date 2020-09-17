@@ -289,9 +289,6 @@ class Ui_self(QtWidgets.QMainWindow):
             print("on_clickmenulist else")
             self.editor.setHtml('')
         
-        print(self.currentTitleJSON)
-        
-        
         if self.currentTitleJSON['se_tradotto']: print("tradotto")
 
         try:
@@ -357,7 +354,6 @@ class Ui_self(QtWidgets.QMainWindow):
 
 
     def riascolto_Audio(self):
-        
         """ Funzione del self che permette di riascoltare l'audio del copybook """
         # posizione = self.indice['file']['titolo'].index(self.currentTitle)
         if self.play_: 
@@ -373,17 +369,6 @@ class Ui_self(QtWidgets.QMainWindow):
 
         self.play_ = True
 
-
-        # Pass the function to execute
-        
-        #self.RiascoltoFunzioneClasse = Worker(fn = self.RiascoltoFunzione) # Any other args, kwargs are passed to the run function
-        # worker.signals.result.connect(self.print_output)
-        # worker.signals.finished.connect(self.thread_complete)
-        # self.RiascoltoFunzione.signals.progress.connect(self.progress_Riascolto_Temp)
-        
-        # Execute
-        #self.threadpool.start(self.RiascoltoFunzioneClasse)
-        
         self.pauseButton.setEnabled(True)
         
         print("riascolto_Audio -> finished") 
@@ -1046,17 +1031,11 @@ class Ui_self(QtWidgets.QMainWindow):
 
 
     def update_position_audio(self, position):
-        # print("update_position_audio -> start \nposition: ",position)        
-        # s = 1000
-        # m = 60000
-        # h = 360000
-        
+        ''' funzione che gestiste il riascolto dell'audio '''
         h, r = divmod(position, 36000)
         m, r = divmod(r, 60000)
         s, _ = divmod(r, 1000)
         
-        ### time = ("%d:%02d:%02d" % (h,m,s)) if h else ("%d:%02d" % (m,s))
-        ### print(time)
     
         self.currentTime = int(str(h) + str(m) + str(s) if h else str(m) + str(s))
         
@@ -1066,31 +1045,24 @@ class Ui_self(QtWidgets.QMainWindow):
             except ValueError:
                 ## in caso in cui l'utente in quel secondo dell'audio non abbia detto niente
                 return
-            testo = ''
-            for x in self.currentTitleJSON['testi'][:position]:
-                testo += x
+            
+            ''' vecchia struttura dati '''
+            #testo = ''
+            #for x in self.currentTitleJSON['testi'][:position]:
+            #    testo += x
+
+            ''' nuova struttura dati '''
+            testo = self.currentTitleJSON['testi'][position]
             
             self.editor.setPlainText(testo)
             
-            
-            '''
-            Siccome per il qtexteditor non è possibile selezionare due font contemporaneamente
-            non è possibile far mostrare all'utente il resto del testo
-            
-            testo = ''
-            for x in self.currentTitleJSON['testi'][position:]:
-                testo += x
-            
-            '''
         
         self.timeSlider.blockSignals(True)
         
         if self.player.duration() != 0:
             self.timeSlider.setValue(position/self.player.duration()*100)
         
-        #self.timeSlider.setValue(20)
         self.timeSlider.blockSignals(False)
-        # print("update_position_audio -> stop")
 
     def stop_riascolto_audio(self):
         ''' Funzione che gestisce la pausa dell'audio in riproduzione '''

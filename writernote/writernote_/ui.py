@@ -1043,7 +1043,7 @@ class Ui_self(QtWidgets.QMainWindow):
             #testo = ''
             #for x in self.currentTitleJSON['testi'][:position]:
             #    testo += x
-            self.editor.setPlainText(testo)
+            #self.editor.setPlainText(testo)
 
             ''' nuova struttura dati '''
             testo = self.currentTitleJSON['testi'][position]

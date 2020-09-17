@@ -73,8 +73,11 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def cambiamenti_testo(self):
         """ Funzione che viene richiamata tutte le volte che durante qualcosa viene scritto qualcosa """
-        text = self.editor.toPlainText()[-1:]
+        #text = self.editor.toPlainText()[-1:]
         
+        # tutte le volte salva tutto il codice in html, in modo da non perdere i tag
+        text = self.editor.toHtml()
+
         if self.registrazione_:
             self.currentTitleJSON['testi'].append(text)
             self.currentTitleJSON['posizione_iniz'].append(str(int(time.time()) - self.tempoAudioRegistazione))
@@ -212,11 +215,6 @@ class Ui_self(QtWidgets.QMainWindow):
         """
             deve aggiungere nella parte
         """
-        #self.other_widget = QtWidgets.QLabel("Other widgets",
-        #    font=QtGui.QFont("Times", 60, QtGui.QFont.Bold),
-        #    alignment=QtCore.Qt.AlignCenter)
-
-        # contatore del tempo
         self.currentTimeLabel = QtWidgets.QLabel(self)
         self.currentTimeLabel.setMinimumSize(QtCore.QSize(80, 0))
         self.currentTimeLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
@@ -233,7 +231,8 @@ class Ui_self(QtWidgets.QMainWindow):
 
 
     def on_clickMenuList(self):
-        """ Funzione per gestire il singolo click all'interno del menu """
+        """ Funzione per gestire il SINGOLO click all'interno del menu """
+        print("on_clickMenuList")
         c = True
         if self.currentTitle is not None:
             posizione = self.indice['file']['titolo'].index(self.currentTitle)
@@ -258,7 +257,6 @@ class Ui_self(QtWidgets.QMainWindow):
             elif check_ == QtWidgets.QMessageBox.Yes:
                 """ Salvataggio del file corrente """
                 with open(self.path + "/" + self.temp_ + "/" + fileDaSalvare + ".json", "w") as f:
-                    ### f.write(str(self.currentTitleJSON).replace("\'", "\"").replace("False", "false").replace("None", "null"))
                     json.dump(self.currentTitleJSON, f)
         
         # Change the current title
@@ -272,6 +270,28 @@ class Ui_self(QtWidgets.QMainWindow):
         with open(self.path + "/" + self.temp_ + "/" + fileDaCaricare + ".json") as fileD:
             self.currentTitleJSON = json.load(fileD)
 
+        # caricamento del testo
+        if not self.indice['file']['audio'][posizione] and len(self.currentTitleJSON['testi']) != 0:
+            # se non è registrato
+            self.editor.setHtml(self.currentTitleJSON['testi'][0])
+            
+        elif self.indice['file']['audio'][posizione]:
+            ''' vecchio formato '''
+            ##daCaricare_ = ''
+            ##for x in self.currentTitleJSON['testi']:
+            ##    daCaricare_ += x
+
+            ''' nuovo formato '''
+            daCaricare_ = self.currentTitleJSON['testi'][-1]
+
+            self.editor.setHtml(daCaricare_)
+        else:
+            print("on_clickmenulist else")
+            self.editor.setHtml('')
+        
+        print(self.currentTitleJSON)
+        
+        
         if self.currentTitleJSON['se_tradotto']: print("tradotto")
 
         try:
@@ -281,8 +301,15 @@ class Ui_self(QtWidgets.QMainWindow):
 
         self.editor.setEnabled(True)
         self.deleteCopyBook.setEnabled(True)
-        #print("self.indice['file']['audio'][posizione]: {}".format(self.indice['file']['audio'][posizione]))
         if self.indice['file']['audio'][posizione] is None:
+            # se non c'è l'audio
+            self.volumeSlider.setEnabled(False)
+            self.registrare_action.setEnabled(False)
+            self.registrare_actionStop.setEnabled(False)
+            self.video_import.setEnabled(False)
+            self.riascoltoAudio.setEnabled(False)
+            self.deleteAudio_Button.setEnabled(False)
+            
             return True
 
         self.volumeSlider.setEnabled(True)
@@ -307,15 +334,6 @@ class Ui_self(QtWidgets.QMainWindow):
         
 
     def updateList_(self):
-        # Eliminazione di tutta la lista per riscriverla da capo
-        # --> Le modifiche verranno fatte direttamente da self.titolo, self.audio, self.video
-        """ Aggiornamento del self.indice """
-        # if self.video: self.indice['file']['video'] = self.video
-        # if self.audio: self.indice['file']['audio'] = self.audio
-        # if self.titolo: self.indice['file']['titolo'] = self.titolo
-        # if self.compressione: self.indice['file']['compressione'] = self.compressione
-        # if self.file_testo: self.indice['file']['file_testo'] = self.file_testo
-
         self.indice['video_checksum'] = len(self.indice['file']['titolo'])
 
         """ Aggiornamento della lista """
@@ -510,7 +528,6 @@ class Ui_self(QtWidgets.QMainWindow):
 
 
     def caricamentoJSON(self):
-            
         try:
             with open("indice.json", 'r') as f:
                 self.indice = json.load(f)
@@ -526,6 +543,9 @@ class Ui_self(QtWidgets.QMainWindow):
             print("PATH:",path)
             with open(path + "images/indice.json") as f:
                 self.indice = json.load(f)
+                
+        except:
+            return self.dialog_critical("Sorry we had a internal problem, with the indice.json, retry.")
 
         return True
 
@@ -746,9 +766,10 @@ class Ui_self(QtWidgets.QMainWindow):
                 fileDaScrivere = json.load(default)
                 fileDaScrivere['audio_position_path'] = None 
 
-        with open(self.temp_ + "/" + nomeTemp + ".json", "w") as file_:
+        with open(self.path + "/" + self.temp_ + "/" + nomeTemp + ".json", "w") as file_:
             json.dump(fileDaScrivere, file_)
-            ### file_.write(str(fileDaScrivere).replace("False", "false").replace("None", "null"))
+
+        self.editor.setHtml('')
 
         del i, nomeTemp
         
@@ -783,8 +804,15 @@ class Ui_self(QtWidgets.QMainWindow):
             posizione = self.indice['file']['titolo'].index(self.currentTitle)
 
             with open(self.path + "/" + self.temp_ + "/" + self.indice['file']['file_testo'][posizione] + ".json", "w") as c: 
+                if self.registrazione_:
+                    ''' deve stoppare la registrazione '''
+                    self.stopRecording()
+                else:
+                    if not self.currentTitleJSON['se_registrato']:
+                        # se non è registrato
+                        self.currentTitleJSON['testi'] = [self.editor.toHtml()]
+                print("_save_to_path ", self.currentTitleJSON)
                 json.dump(self.currentTitleJSON, c)
-        
 
 
         if not zip_.compressFolder(self.path, self.temp_, self.nameFile):
@@ -983,7 +1011,6 @@ class Ui_self(QtWidgets.QMainWindow):
             
             self.updateList_()
 
-    
 
     def position_changed(self, position):
         """ Se l'utente manualmente cambia la posizione """
@@ -1174,28 +1201,9 @@ class Ui_self(QtWidgets.QMainWindow):
         self.horizontalLayout_5.addWidget(self.pauseButton)
         self.pauseButton.clicked.connect(self.stop_riascolto_audio)
         
-
-
-        ## stop botton definition 
-        ## self.stopButton = QtWidgets.QPushButton(self.centralWidget)
-        ## self.stopButton.setText("")
-        ## icon3 = QtGui.QIcon()
-        ## icon3.addPixmap(QtGui.QPixmap("images/control-stop-square.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        ## self.stopButton.setIcon(icon3)
-        ## self.stopButton.setObjectName("stopButton")
-        ## self.horizontalLayout_5.addWidget(self.stopButton)
-        
-        # self.stopButton.pressed.connect(self.stop_audio_riascolto)
-        # self.playButton.pressed.connect(self.player.play)
-        # self.pauseButton.pressed.connect(self.player.pause)
-        
         # self.stopButton.setObjectName("Stop audio playback")
         self.playButton.setObjectName("Start audio playback")
         self.pauseButton.setObjectName("Pause audio playback")
-
-        
-
-        
 
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_5.addItem(spacerItem)
@@ -1330,6 +1338,15 @@ class Ui_self(QtWidgets.QMainWindow):
         self.video_import.setStatusTip("Import Video")
         self.video_import.triggered.connect(self.videoImport)
         self.toolBar.addAction(self.video_import)
+
+        ''' style for the text '''
+        self.style_toolbar = QToolBar("Style")
+        self.style_toolbar.setIconSize(QSize(20, 20))
+        self.addToolBar(self.style_toolbar)
+        
+        self.boldAction = QtWidgets.QAction(QtGui.QIcon("images/bold.png"),"Bold",self)
+        self.boldAction.triggered.connect(self.bold)
+        self.style_toolbar.addAction(self.boldAction)
 
         self.edit_toolbar = QToolBar("Edit")
         self.edit_toolbar.setIconSize(QSize(20, 20))
@@ -1469,10 +1486,18 @@ class Ui_self(QtWidgets.QMainWindow):
         print(self.indice)
 
 
+    def bold(self):
+        if self.editor.fontWeight() == QtGui.QFont.Bold:
 
+            self.editor.setFontWeight(QtGui.QFont.Normal)
+
+        else:
+            self.editor.setFontWeight(QtGui.QFont.Bold)
+
+        print(self.editor.toPlainText())
+    
 
 def launch():
-    print("ciao")
     import sys
     qapp = QtWidgets.QApplication(sys.argv) 
     

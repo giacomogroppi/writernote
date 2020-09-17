@@ -231,7 +231,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
 
     def on_clickMenuList(self):
-        """ Funzione per gestire il SINGOLO click all'interno del menu """
+        """ Funzione per gestire il doppio click all'interno del menu """
         print("on_clickMenuList")
         c = True
         if self.currentTitle is not None:
@@ -301,13 +301,11 @@ class Ui_self(QtWidgets.QMainWindow):
         if self.indice['file']['audio'][posizione] is None:
             # se non c'è l'audio
             self.volumeSlider.setEnabled(False)
-            self.registrare_action.setEnabled(False)
-            self.registrare_actionStop.setEnabled(False)
-            self.video_import.setEnabled(False)
             self.riascoltoAudio.setEnabled(False)
             self.deleteAudio_Button.setEnabled(False)
             
             return True
+        
 
         self.volumeSlider.setEnabled(True)
         self.registrare_actionStop.setDisabled(True)
@@ -825,11 +823,6 @@ class Ui_self(QtWidgets.QMainWindow):
         self.editor.setLineWrapMode( 1 if self.editor.lineWrapMode() == 0 else 0 )
 
 
-    '''
-    definizione di tutte le funzioni necessarie per registrare l'audio
-    mentre si scrive
-
-    '''
 
     def normalize(self, snd_data):
         print(snd_data)

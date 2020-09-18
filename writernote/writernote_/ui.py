@@ -682,7 +682,7 @@ class Ui_self(QtWidgets.QMainWindow):
         if self.path is None: self.path = os.getcwd()
 
         if sys.platform == 'linux':
-            if os.path.isdir("/tmp/writernote"):
+            if not os.path.isdir("/tmp/writernote"):
                 os.mkdir("/tmp/writernote")
 
         elif sys.platform == 'windows':

@@ -25,6 +25,11 @@ apps:
       - audio-record
       - audio-playback
       - home
+      - pulseaudio
+      - unity7
+      - browser-support
+      - network
+      - gsettings
 
 
 

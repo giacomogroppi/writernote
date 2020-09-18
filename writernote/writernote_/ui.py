@@ -1277,14 +1277,14 @@ class Ui_self(QtWidgets.QMainWindow):
         self.toolBar.addAction(new_menu_action)
 
 
-        open_file_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'blue-folder-open-document.png')),"Open file...",self)
+        self.open_file_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'blue-folder-open-document.png')),"Open file...",self)
          # open file method
 
         
-        open_file_action.setStatusTip("Open file")
-        open_file_action.triggered.connect(self.file_open)
-        self.file_menu.addAction(open_file_action)
-        self.toolBar.addAction(open_file_action)
+        self.open_file_action.setStatusTip("Open file")
+        self.open_file_action.triggered.connect(self.file_open)
+        self.file_menu.addAction(self.open_file_action)
+        self.toolBar.addAction(self.open_file_action)
 
         self.save_file_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'disk.png')), "Save", self)
         self.save_file_action.setStatusTip("Save current page")
@@ -1313,7 +1313,7 @@ class Ui_self(QtWidgets.QMainWindow):
         self.toolBar.addAction(self.registrare_action)
 
 
-        self.registrare_actionStop = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'StopRecordingAudio.png')), "Stop Record...", self)
+        self.registrare_actionStop = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'StopRecordingAudio.png')), "Stop Record...", self)
         self.registrare_actionStop.setStatusTip("Stop recording Audio")
         self.registrare_actionStop.triggered.connect(self.stopRecording)
         self.file_menu.addAction(self.registrare_actionStop)
@@ -1337,17 +1337,17 @@ class Ui_self(QtWidgets.QMainWindow):
         self.style_toolbar.addAction(self.boldAction)
 
         # defining the toolbar
-        self.edit_toolbar = QToolBar("Edit")
+        self.edit_toolbar = QtWidgets.QToolBar("Edit")
         self.edit_toolbar.setIconSize(QSize(20, 20))
         self.addToolBar(self.edit_toolbar)
         self.edit_menu = self.menuBar().addMenu("&Edit")
 
-        self.undo_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'arrow-curve-180-left.png')), "Undo", self)
+        self.undo_action = QtWidgets.QAction(QIcon(os.path.join(pathFolder + 'images', 'arrow-curve-180-left.png')), "Undo", self)
         self.undo_action.setStatusTip("Undo last change")
         self.undo_action.triggered.connect(self.editor.undo)
         self.edit_menu.addAction(self.undo_action)
 
-        self.redo_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'arrow-curve.png')), "Redo", self)
+        self.redo_action = QtWidgets.QAction(QIcon(os.path.join(pathFolder + 'images', 'arrow-curve.png')), "Redo", self)
         self.redo_action.setStatusTip("Redo last change")
         self.redo_action.triggered.connect(self.editor.redo)
         self.edit_toolbar.addAction(self.redo_action)
@@ -1355,7 +1355,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
         self.edit_menu.addSeparator()
         
-        self.cut_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'scissors.png')), "Cut", self)
+        self.cut_action = QtWidgets.QAction(QIcon(os.path.join(pathFolder + 'images', 'scissors.png')), "Cut", self)
         self.cut_action.setStatusTip("Cut selected text")
         self.cut_action.triggered.connect(self.cutFunction)
         self.edit_toolbar.addAction(self.cut_action)

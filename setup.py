@@ -16,7 +16,7 @@ def findImages() -> list:
     finale = ['writernote/indice.json',
             'writernote/default_file.json',
             'writernote/config.json',
-            'writernote/images/videoImport.png']
+            'writernote/images/importVideo.png']
     finale.extend(name)
 
     return finale

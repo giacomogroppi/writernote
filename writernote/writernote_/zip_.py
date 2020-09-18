@@ -63,15 +63,18 @@ def extractAll(zipname, path, temporaneo):
     import os
     try:
         with zipfile.ZipFile(path + "/" + zipname, mode='r') as zf:
-            zf.extractall(path + "/" + temporaneo)
+            zf.extractall("/tmp/writernote/" + temporaneo)
         return True
         
+    except PermissionError:
+        raise PermissionError("We had a problem with the permission")
+
     except Exception as e:
         print(str(e))
         return False
 
 def compressAll(path, temp_, nameFile):
-    if 1:
+    try:
         def zipdir(path, ziph):
             for root, dirs, files in os.walk(path):
                 print(root, dirs, files)
@@ -89,15 +92,13 @@ def compressAll(path, temp_, nameFile):
         
         return True
 
-    try:
-        print("")
     except Exception as e:
         print(str(e))
         return False
 
 def compressFolder(path, temp_, nameFile):
     import shutil
-    shutil.make_archive(path + "/" + nameFile, 'zip', path + "/" + temp_)
+    shutil.make_archive(path + "/" + nameFile, 'zip', "/tmp/writernote/" + temp_)
     
     base = os.path.splitext(path + "/" + nameFile)[0]
     os.rename(path + "/" + nameFile + ".zip", base + ".writer")

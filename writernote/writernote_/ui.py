@@ -121,20 +121,20 @@ class Ui_self(QtWidgets.QMainWindow):
 
         if indice_base == self.indice:
             # It means there is no file to save
-            import shutil
-            shutil.rmtree(self.path + "/" + self.temp_)
-            
+            shutil.rmtree("/tmp/writernote/" + self.temp_)
+            event.accept()
             return True
 
         close = QtWidgets.QMessageBox.question(self,
                                      "QUIT",
-                                     "Do you want to save?",
-                                     QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.No
+                                     "You are exing without saving?",
+                                     QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Close
                                      )
-
+        variableClose, _ = close.as_integer_ratio()
+        
         import shutil
-        if close == QtWidgets.QMessageBox.Yes:
-            print("SI")
+        if variableClose == 2048:
+            print("save")
             if self.nameFile is not None:
                 if not zip_.compressFolder(self.path, self.temp_, self.nameFile):
                     self.dialog_critical("We had a problem to save the save.\nPlease retry")
@@ -148,16 +148,20 @@ class Ui_self(QtWidgets.QMainWindow):
 
                 return False       
             
-            shutil.rmtree(self.path + "/" + self.temp_)    
+            shutil.rmtree("/tmp/writernote/" + self.temp_)    
             
             event.accept()
         
-        elif close == QtWidgets.QMessageBox.No:
-            shutil.rmtree(self.path + "/" + self.temp_)
+        elif variableClose == 8388608:
+            ''' close without saving'''
+            print("close without saving")
+            shutil.rmtree("/tmp/writernote/" + self.temp_)
             event.accept()
             return False
 
-        else: 
+        elif variableClose == 2097152: 
+            ''' Close '''
+            print("close")
             event.ignore()
             return False
 
@@ -200,13 +204,13 @@ class Ui_self(QtWidgets.QMainWindow):
         posizione = self.indice['file']['titolo'].index(currentItem.text())
         
         ### Rimozione dell'audio
-        os.remove(self.path + "/" + self.temp_ + "/" + self.indice['file']['audio'][posizione])
+        os.remove("/tmp/writernote/" + self.temp_ + "/" + self.indice['file']['audio'][posizione])
         
-        with open(self.path + "/" + self.temp_ + "/" + self.indice['file']['file_testo'][posizione]) as fileReadable:
+        with open("/tmp/writernote/" + self.temp_ + "/" + self.indice['file']['file_testo'][posizione]) as fileReadable:
             fileReadable = json.load(fileReadable)
             fileReadable['audio_position_path'] = None
 
-            with open(self.path + "/" + self.temp_ + "/" + self.indice['file']['file_testo'][posizione], "w") as file_:
+            with open("/tmp/writernote/" + self.temp_ + "/" + self.indice['file']['file_testo'][posizione], "w") as file_:
                 ### file.write(str(fileReadable).replace("False", "false").replace("None", "null"))
                 json.dump(fileReadable, file_)
 
@@ -235,6 +239,11 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def on_clickMenuList(self):
         """ Funzione per gestire il doppio click all'interno del menu """
+
+        if self.registrazione_:
+            # sta segistrando
+            return
+
         print("on_clickMenuList")
         c = True
         if self.currentTitle is not None:
@@ -259,7 +268,7 @@ class Ui_self(QtWidgets.QMainWindow):
             
             elif check_ == QtWidgets.QMessageBox.Yes:
                 """ Salvataggio del file corrente """
-                with open(self.path + "/" + self.temp_ + "/" + fileDaSalvare + ".json", "w") as f:
+                with open("/tmp/writernote/" + self.temp_ + "/" + fileDaSalvare + ".json", "w") as f:
                     json.dump(self.currentTitleJSON, f)
         
         # Change the current title
@@ -270,7 +279,7 @@ class Ui_self(QtWidgets.QMainWindow):
         posizione = self.indice['file']['titolo'].index(self.currentTitle)
         fileDaCaricare = self.indice['file']['file_testo'][posizione]
 
-        with open(self.path + "/" + self.temp_ + "/" + fileDaCaricare + ".json") as fileD:
+        with open("/tmp/writernote/" + self.temp_ + "/" + fileDaCaricare + ".json") as fileD:
             self.currentTitleJSON = json.load(fileD)
 
         # caricamento del testo
@@ -307,6 +316,8 @@ class Ui_self(QtWidgets.QMainWindow):
             self.riascoltoAudio.setEnabled(False)
             self.deleteAudio_Button.setEnabled(False)
             
+            self.registrare_action.setEnabled(True)
+
             #non può stoppare
             self.registrare_actionStop.setDisabled(True)
             return True
@@ -327,7 +338,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
         self.player.setMedia(
                 QMediaContent(
-                    QUrl.fromLocalFile(self.path + "/" + self.temp_ + "/" + self.indice['file']['audio'][posizione])
+                    QUrl.fromLocalFile("/tmp/writernote/" + self.temp_ + "/" + self.indice['file']['audio'][posizione])
                 )
             )
         
@@ -350,10 +361,8 @@ class Ui_self(QtWidgets.QMainWindow):
 
         
         
-        with open(self.path + "/" + self.temp_ + "/indice.json", "w") as fileD:
+        with open("/tmp/writernote/" + self.temp_ + "/indice.json", "w") as fileD:
             json.dump(self.indice, fileD)
-
-
 
 
     def riascolto_Audio(self):
@@ -381,8 +390,6 @@ class Ui_self(QtWidgets.QMainWindow):
         """ It compress the video in the saim folder """
         position = self.indice['file']['titolo'].index(currentItem.text())
 
-
-
         if self.indice['file']['compressione'][position]:
             self.dialog_critical("The video is already compress in h264")
 
@@ -405,12 +412,12 @@ class Ui_self(QtWidgets.QMainWindow):
     def contextMenuEvent(self, event):
         ### Funzione per gestire il tasto destro all'interno del menu del copybook
         
-        if not os.path.exists(self.path + "/" + self.temp_ + "/indice.json"):
+        if not os.path.exists("/tmp/writernote/" + self.temp_ + "/indice.json"):
             return 
 
 
-        contextMenu = QMenu(self.listwidget)
-
+        contextMenu = QtWidgets.QMenu(self.listwidget)
+        
         self.listwidget.addQuaderno = contextMenu.addAction("New")
         self.listwidget.deleteQuaderno = contextMenu.addAction("Del")
         self.listwidget.deleteAudio = contextMenu.addAction("Del audio")
@@ -470,7 +477,7 @@ class Ui_self(QtWidgets.QMainWindow):
             return False
 
 
-        """ check internet connection with the google dns """
+        """ check internet connection with the google url """
         import socket
         try:
             hostname = 'www.google.com'
@@ -542,7 +549,7 @@ class Ui_self(QtWidgets.QMainWindow):
             return False
 
         # Serve per capire dove sia il file che vuole scindere
-        path_File, _ = QFileDialog.getOpenFileName(self, "Open video", "", "Video (*.mp4);All files (*.*)")
+        path_File, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open video", "", "Video (*.mp4);All files (*.*)")
 
         if path_File:
             if not os.path.exists(path_File):
@@ -570,8 +577,12 @@ class Ui_self(QtWidgets.QMainWindow):
             return
 
 
-        video = Video(path_File, self.temp_)
-        
+        video = audio_decoder.Video(
+            path = path_File, 
+            temp_ = self.temp_,
+            nameAudio = None
+            )
+
         """ Scissione """
         audioName = video.scissione()
 
@@ -600,10 +611,10 @@ class Ui_self(QtWidgets.QMainWindow):
             if x != '': path_finale = path_finale + '/' +  x
         
         # in this case the path change and we need to moove the temp folder
-        if self.path != path_finale:
-            print(self.path, self.temp_, path_finale)
+        #if self.path != path_finale:
+        #    print(self.path, self.temp_, path_finale)
 
-            shutil.move(self.path + "/" + self.temp_, path_finale + "/")
+        #    shutil.move(self.path + "/" + self.temp_, path_finale + "/")
 
         self.path = path_finale
         #MyWindow.path = path_finale
@@ -613,7 +624,7 @@ class Ui_self(QtWidgets.QMainWindow):
     def file_open(self, check = False):
 
         if not check: 
-            path, _ = QFileDialog.getOpenFileName(self, "Open file", "", "Writernote file (*.writer);All files (*.*)")
+            path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open file", "", "Writernote file (*.writer);All files (*.*)")
         else:
             path = self.path
         
@@ -630,7 +641,7 @@ class Ui_self(QtWidgets.QMainWindow):
                 return
 
             # Carica l'indice dalla cartella ./temporaneo
-            with open(self.path + "/" + self.temp_ + "/indice.json") as f:
+            with open("/tmp/writernote/" + self.temp_ + "/indice.json") as f:
                 self.indice = json.load(f)
                 
 
@@ -641,7 +652,7 @@ class Ui_self(QtWidgets.QMainWindow):
             if len(self.indice['file']['titolo']) != len(self.indice['file']['audio']) or len(self.indice['file']['titolo']) != int(self.indice['video_checksum']):
                 del self.indice
                 self.dialog_critical("The file is curropted")
-            
+                return 
             self.NewAudio.setEnabled(True)
         else:
             return False
@@ -655,7 +666,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def file_saveas(self):
         if self.path is None or self.nameFile is None:
-            path, _ = QFileDialog.getSaveFileName(self, "Save file", "", "Text documents (*.txt);All files (*.*)")
+            path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save file", "", "Text documents (*.txt);All files (*.*)")
             
             if not path:
                 # If dialog is cancelled, will return False
@@ -668,35 +679,41 @@ class Ui_self(QtWidgets.QMainWindow):
         """ Viene eseguita la funzione appena il programma finisce di caricare """
         if self.path is None: self.path = os.getcwd()
 
-        print("self.temp_: ",self.temp_)
+        if sys.platform == 'linux':
+            if os.path.isdir("/temp/writernote"):
+                os.mkdir("/tmp/writernote")
+
+        elif sys.platform == 'windows':
+            ''' it is not support windows for this application '''
+            raise OSError("Windows is not supported for this application")
+        
         if self.temp_ is not None: return
         
         variabile = 0
         while True:
-            #print(self.path + "./temporaneo" + str(variabile))
-            if not os.path.exists(self.path + "/.temporaneo" + str(variabile)):
-                self.temp_ = '.temporaneo' + str(variabile)
+            if not os.path.exists("/tmp/writernote/temporaneo" + str(variabile)):
+                self.temp_ = 'temporaneo' + str(variabile)
                 #MyWindow.temp_ = '.temporaneo' + str(variabile)
                 break
             variabile = variabile + 1
-
-        os.mkdir(self.path + "/" + self.temp_)
+        
+        del variabile
+        
+        os.mkdir("/tmp/writernote/" + self.temp_)
 
     
     def NewFileComplite(self):
         """ crea una cartella completa con l'indice vuoto, senza settare il nome del file """
         if self.path is None: self.path = os.getcwd()
     
-        if os.path.exists(self.path + "/" + self.temp_ + "/indice.json"):
+        if os.path.exists("/tmp/writernote/" + self.temp_ + "/indice.json"):
             self.dialog_critical("You have already create a new book, to write something create a new copybook")
             return
 
-        with open(self.path + "/" + self.temp_ + "/" + "indice.json", "w") as f: 
+        with open("/tmp/writernote/" + self.temp_ + "/" + "indice.json", "w") as f: 
             f.write(str(self.indice).replace("False", "false").replace("None", "null"))
         
         self.NewAudio.setEnabled(True)
-
-        
 
     def newCopyBook_(self, callback):
         """ funzione che viene richiamata da newCopyBook """
@@ -706,10 +723,6 @@ class Ui_self(QtWidgets.QMainWindow):
             self.dialog_critical("you can't create two different copybook with the same name")
             return
 
-        #self.video.append(None)
-        #self.audio.append(None)
-        #self.titolo.append(callback)
-        #self.compressione.append(None)
         self.indice['file']['video'].append(None)
         self.indice['file']['audio'].append(None)
         self.indice['file']['titolo'].append(callback)
@@ -724,7 +737,7 @@ class Ui_self(QtWidgets.QMainWindow):
         nomeTemp = str(datetime.datetime.now()).replace(" ", "").replace(":", "")
 
         while True:
-            if not os.path.exists(self.path + "/" + self.temp_ + "/" + "nameFile" +str(nomeTemp) + str(i)):    
+            if not os.path.exists("/tmp/writernote/" + self.temp_ + "/" + "nameFile" +str(nomeTemp) + str(i)):    
                 nomeTemp = "nameFile" +str(nomeTemp) + str(i)
                 break
             i += 1
@@ -748,7 +761,7 @@ class Ui_self(QtWidgets.QMainWindow):
                 fileDaScrivere = json.load(default)
                 fileDaScrivere['audio_position_path'] = None 
 
-        with open(self.path + "/" + self.temp_ + "/" + nomeTemp + ".json", "w") as file_:
+        with open("/tmp/writernote/" + self.temp_ + "/" + nomeTemp + ".json", "w") as file_:
             json.dump(fileDaScrivere, file_)
 
         self.editor.setHtml('')
@@ -778,14 +791,14 @@ class Ui_self(QtWidgets.QMainWindow):
 
         self.indice['video_checksum'] = len(self.indice['file']['titolo'])
 
-        with open(self.path + "/" + self.temp_ + "/indice.json", "w") as f:
+        with open("/tmp/writernote/" + self.temp_ + "/indice.json", "w") as f:
             json.dump(self.indice, f)
             ### f.write(str(self.indice))
 
         if self.currentTitle is not None:
             posizione = self.indice['file']['titolo'].index(self.currentTitle)
 
-            with open(self.path + "/" + self.temp_ + "/" + self.indice['file']['file_testo'][posizione] + ".json", "w") as c: 
+            with open("/tmp/writernote/" + self.temp_ + "/" + self.indice['file']['file_testo'][posizione] + ".json", "w") as c: 
                 if self.registrazione_: self.stopRecording()
 
                 if not self.currentTitleJSON['se_registrato'] and len(self.currentTitleJSON['testi']) < 2:
@@ -902,16 +915,9 @@ class Ui_self(QtWidgets.QMainWindow):
                 snd_data.byteswap()
             r.extend(snd_data)
 
-
-            
-        print("uscito dal ciclo")
-
-
         sample_width = self.audio.get_sample_size(self.FORMAT)
         stream.stop_stream()
         stream.close()
-
-
 
         self.audio.terminate()
 
@@ -924,13 +930,13 @@ class Ui_self(QtWidgets.QMainWindow):
         date = str(datetime.datetime.now()).replace(" ", "").replace(":", "")
         i = 0
         while True:
-            if not os.path.exists(self.path + "/" + self.temp_ + "/" + "audio" + str(date) + str(i)):
+            if not os.path.exists("/tmp/writernote/" + self.temp_ + "/" + "audio" + str(date) + str(i)):
                 nameAudioPosition =  "audio" + str(date) + str(i)
                 break
             i += 1
         del i
 
-        wf = wave.open(self.path + "/" + self.temp_ + "/" + nameAudioPosition, 'wb')
+        wf = wave.open("/tmp/writernote/" + self.temp_ + "/" + nameAudioPosition, 'wb')
         
         wf.setnchannels(1)
         wf.setsampwidth(sample_width)
@@ -965,7 +971,16 @@ class Ui_self(QtWidgets.QMainWindow):
             
             self.pool = multiprocessing.Pool()
             
-            self.odd_result = self.pool.apply_async(self.record, args=(self.odd_queue, self.path, self.temp_, self.indice, self.currentTitle), error_callback=callBack)
+            self.odd_result = self.pool.apply_async(
+                self.record, 
+                args=(
+                    self.odd_queue, 
+                    self.path, 
+                    self.temp_, 
+                    self.indice, 
+                    self.currentTitle), 
+                error_callback=callBack
+                )
                        
             
         else:
@@ -1031,7 +1046,7 @@ class Ui_self(QtWidgets.QMainWindow):
             try:
                 position = self.currentTitleJSON['posizione_iniz'].index(str(self.currentTime))
             except ValueError:
-                ## in caso in cui l'utente in quel secondo dell'audio non abbia detto niente
+                ## in caso in cui l'utente in quel secondo dell'audio non abbia detto niente -> e non ci sia niente all'interno della lista
                 return
             
             ''' vecchia struttura dati '''
@@ -1072,11 +1087,19 @@ class Ui_self(QtWidgets.QMainWindow):
         print("stop_riascolto_audio -> stop")
 
     def startRecording(self):
+        self.registrare_actionStop.setEnabled(True)
+        self.registrare_action.setEnabled(False)
         self.tempoAudioRegistazione = int(time.time())
         self.registrazione_ = True
         self.record_to_file('start')
+        self.video_import.setEnabled(False)
     
     def stopRecording(self):
+        self.registrare_actionStop.setEnabled(False)
+
+        #non può registrare un altro audio
+        self.registrare_action.setEnabled(False)
+        self.video_import.setEnabled(False)
         self.record_to_file('stop')
         self.registrazione_ = False
         
@@ -1261,19 +1284,19 @@ class Ui_self(QtWidgets.QMainWindow):
         self.file_menu.addAction(open_file_action)
         self.toolBar.addAction(open_file_action)
 
-        save_file_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'disk.png')), "Save", self)
-        save_file_action.setStatusTip("Save current page")
-        save_file_action.triggered.connect(self.file_save)
-        self.file_menu.addAction(save_file_action)
-        self.toolBar.addAction(save_file_action)
+        self.save_file_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'disk.png')), "Save", self)
+        self.save_file_action.setStatusTip("Save current page")
+        self.save_file_action.triggered.connect(self.file_save)
+        self.file_menu.addAction(self.save_file_action)
+        self.toolBar.addAction(self.save_file_action)
 
-        saveas_file_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'disk--pencil.png')), "Save As...", self)
-        saveas_file_action.setStatusTip("Save current page to specified file")
-        saveas_file_action.triggered.connect(self.file_saveas)
-        self.file_menu.addAction(saveas_file_action)
-        self.toolBar.addAction(saveas_file_action)
+        self.saveas_file_action = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'disk--pencil.png')), "Save As...", self)
+        self.saveas_file_action.setStatusTip("Save current page to specified file")
+        self.saveas_file_action.triggered.connect(self.file_saveas)
+        self.file_menu.addAction(self.saveas_file_action)
+        self.toolBar.addAction(self.saveas_file_action)
 
-        self.print_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'printer.png')), "Print...", self)
+        self.print_action = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'printer.png')), "Print...", self)
         self.print_action.setStatusTip("Print current page")
         self.print_action.triggered.connect(self.file_print)
         self.file_menu.addAction(self.print_action)
@@ -1281,23 +1304,24 @@ class Ui_self(QtWidgets.QMainWindow):
 
 
         """ Start and Stop recording audio """
-        self.registrare_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'recoding.png')), "Record...", self)
+        self.registrare_action = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'recoding.png')), "Record...", self)
         self.registrare_action.setStatusTip("Record the screen")
         self.registrare_action.triggered.connect(self.startRecording)
         self.file_menu.addAction(self.registrare_action)
         self.toolBar.addAction(self.registrare_action)
 
 
-        self.registrare_actionStop = QAction(QIcon(os.path.join(pathFolder + 'images', 'StopRecordingAudio.png')), "Stop Record...", self)
+        self.registrare_actionStop = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'StopRecordingAudio.png')), "Stop Record...", self)
         self.registrare_actionStop.setStatusTip("Stop recording Audio")
         self.registrare_actionStop.triggered.connect(self.stopRecording)
         self.file_menu.addAction(self.registrare_actionStop)
         self.toolBar.addAction(self.registrare_actionStop)
 
 
-        self.video_import = QAction(QIcon(os.path.join(pathFolder + 'images', 'importVideo.png')), "Import video...", self)
+        self.video_import = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'importVideo.png')), "Import video...", self)
         self.video_import.setStatusTip("Import Video")
         self.video_import.triggered.connect(self.videoImport)
+        self.file_menu.addAction(self.video_import)
         self.toolBar.addAction(self.video_import)
 
         ''' style for the text '''
@@ -1305,10 +1329,12 @@ class Ui_self(QtWidgets.QMainWindow):
         self.style_toolbar.setIconSize(QSize(20, 20))
         self.addToolBar(self.style_toolbar)
         
-        self.boldAction = QtWidgets.QAction(QtGui.QIcon("images/bold.png"),"Bold",self)
+        self.boldAction = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', "bold.png")),"Bold",self)
+        self.boldAction.setStatusTip("Bold the text")
         self.boldAction.triggered.connect(self.bold)
         self.style_toolbar.addAction(self.boldAction)
 
+        # defining the toolbar
         self.edit_toolbar = QToolBar("Edit")
         self.edit_toolbar.setIconSize(QSize(20, 20))
         self.addToolBar(self.edit_toolbar)
@@ -1406,7 +1432,8 @@ class Ui_self(QtWidgets.QMainWindow):
         self.NewAudio.setDisabled(True)
         self.riascoltoAudio.setDisabled(True)
         self.deleteAudio_Button.setDisabled(True)
-
+        self.registrare_actionStop.setDisabled(True)
+        self.registrare_action.setDisabled(True)
         
         self.listwidget.doubleClicked.connect(self.on_clickMenuList)
         self.Audio_option_menu.addSeparator()
@@ -1424,7 +1451,7 @@ class Ui_self(QtWidgets.QMainWindow):
         posizione = self.indice['file']['titolo'].index(currentItemTemp)
 
         ## Rimozione del file nameFile dalla cartella self.temp_
-        os.remove(self.path + "/" + self.temp_ + "/" + self.indice['file']['file_testo'][posizione] + ".json")
+        os.remove("/tmp/writernote/" + self.temp_ + "/" + self.indice['file']['file_testo'][posizione] + ".json")
         
         del self.indice['file']['titolo'][posizione]
         del self.indice['file']['audio'][posizione]

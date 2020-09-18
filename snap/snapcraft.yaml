@@ -1,5 +1,5 @@
 name: writernote
-version: 0.1.3
+version: 0.1.5
 
 summary: Writernote
 
@@ -30,8 +30,12 @@ apps:
       - browser-support
       - network
       - gsettings
+      - cifs-mount
 
 
+layout:
+  /usr/share/alsa:
+    bind: $SNAP/usr/share/alsa
 
 
 parts:
@@ -67,17 +71,22 @@ parts:
     python-version: python3
     source: .
 
-    
+
 
     build-packages:
       - python3
       - python3-pyqt5
       - execstack
+      - libasound2-dev
+      - gcc
+      - libopus-dev
+      - libortp9
 
     stage-packages:
       - python3
       - libc-bin
       - locales
+      - libasound2
       - python3-pyqt5
       - ffmpeg
       - python3-tk
@@ -94,7 +103,12 @@ parts:
       - libqt5multimedia5-plugins
       - libcanberra-gtk-module 
       - libcanberra-gtk3-module
+      - libasound-dev
+      - libasound2-plugins
     
+      # audio
+      #- libasound0
+      #- libortop9
     
     python-packages:
       - setuptools==45.2.0

@@ -896,13 +896,12 @@ class Ui_self(QtWidgets.QMainWindow):
         print("record")
         self.audio = pyaudio.PyAudio()
         
+        print("record2")
         stream = self.audio.open(format=self.FORMAT, channels=1, rate=self.RATE,
             input=True, output=True,
             frames_per_buffer=self.CHUNK_SIZE)
-
-        
-        snd_started = False
-        
+        print("record3")
+                
         r = array('h')
         
         while True:
@@ -955,24 +954,24 @@ class Ui_self(QtWidgets.QMainWindow):
             self.dialog_critical("You need to select a title in the left of the window")
             return
         
-
-
-        self.THRESHOLD = 500
-        self.CHUNK_SIZE = 1024
-        self.FORMAT = pyaudio.paInt16
-        self.RATE = 44100
+        ''' can not use self variable '''
+        #self.THRESHOLD = 500
+        #self.CHUNK_SIZE = 1024
+        #self.FORMAT = pyaudio.paInt16
+        #self.RATE = 44100
 
         def callBack(item):
             print("callback: ", item)
 
 
-        if method == 'start': 
-
+        if method == 'start':
+            print("multiprocessing1")
             manager = multiprocessing.Manager()
+            print("multiprocessing2")
             self.odd_queue = manager.Queue()
-            
+            print("multiprocessing3")
             self.pool = multiprocessing.Pool()
-            
+            print("multiprocessing4")
             self.odd_result = self.pool.apply_async(
                 self.record, 
                 args=(
@@ -983,7 +982,7 @@ class Ui_self(QtWidgets.QMainWindow):
                     self.currentTitle), 
                 error_callback=callBack
                 )
-                       
+            print("multiprocessing5")
             
         else:
             """ Chiude la registrazione e salva nel path/self.temp_/numerocasuale """ 

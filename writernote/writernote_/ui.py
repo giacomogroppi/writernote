@@ -970,7 +970,11 @@ class Ui_self(QtWidgets.QMainWindow):
             print("multiprocessing2")
             self.odd_queue = manager.Queue()
             print("multiprocessing3")
-            self.pool = multiprocessing.Pool()
+            try:
+                self.pool = multiprocessing.Pool()
+            except PermissionError:
+                return self.dialog_critical("We had a problem with Permission, check the connections of writernote \nType ")
+
             print("multiprocessing4")
             self.odd_result = self.pool.apply_async(
                 self.record, 

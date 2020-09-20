@@ -1,5 +1,5 @@
 name: writernote
-version: 0.1.5
+version: 0.1.6
 
 summary: Writernote
 
@@ -15,30 +15,74 @@ base: core18
 
 apps:
   writernote:
+    command-chain: ["snap/command-chain/alsa-launch"]
     command: desktop-launch $SNAP/bin/writernote
     plugs:
+      - alsa
       - desktop
       - desktop-legacy
       - wayland
       - x11
       - opengl
       - audio-record
-      - audio-playback
       - home
       - pulseaudio
       - unity7
       - browser-support
       - network
       - gsettings
-      - cifs-mount
+      - network-bind
+      - audio-playback
+      - network-manager
+      - process-control
+      - mount-observe
 
+      - optical-drive
+      - camera
+      - removable-media
+      - screen-inhibit-control
+      - dvb
+      - jack1
+      - avahi-control
+
+    slots:
+      - mpris
+
+plugs:
+  gsettings:
+  gtk-3-themes:
+    interface: content
+    target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes
+  icon-themes:
+    interface: content
+    target: $SNAP/data-dir/icons
+    default-provider: gtk-common-themes
+  sound-themes:
+    interface: content
+    target: $SNAP/data-dir/sounds
+    default-provider: gtk-common-themes
+  qt551:
+    interface: content
+    target: $SNAP/qt551
+    default-provider: qt551
 
 layout:
-  /usr/share/alsa:
-    bind: $SNAP/usr/share/alsa
-
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib:
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib
 
 parts:
+  alsa-mixin:
+    plugin: dump
+    source: https://github.com/diddlesnaps/snapcraft-alsa.git
+    source-subdir: snapcraft-assets
+    build-packages:
+      - libasound2-dev
+    stage-packages:
+      - libasound2
+      - libasound2-plugins
+
+
   desktop-qt5:
     source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
     source-subdir: qt
@@ -66,7 +110,7 @@ parts:
 
 
   writernote:
-    after: [desktop-qt5]
+    after: [desktop-qt5, alsa-mixin]
     plugin: python
     python-version: python3
     source: .
@@ -91,6 +135,7 @@ parts:
       - ffmpeg
       - python3-tk
       - python3-pyaudio
+      - python-pyaudio
       - qt5-gtk-platformtheme
       - python3-pyqt5.qtwebengine
       - python3-apt
@@ -105,7 +150,6 @@ parts:
       - libcanberra-gtk3-module
       - libasound-dev
       - libasound2-plugins
-    
       # audio
       #- libasound0
       #- libortop9

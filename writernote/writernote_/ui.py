@@ -130,8 +130,13 @@ class Ui_self(QtWidgets.QMainWindow):
                                      "You are exing without saving?",
                                      QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Close
                                      )
-        variableClose, _ = close.as_integer_ratio()
-        
+        try:
+            variableClose, _ = close.as_integer_ratio()
+        except AttributeError:
+            return event.accept()
+        except:
+            return event.ignore()
+
         import shutil
         if variableClose == 2048:
             print("save")
@@ -369,7 +374,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def riascolto_Audio(self):
         """ Funzione del self che permette di riascoltare l'audio del copybook """
-        # posizione = self.indice['file']['titolo'].index(self.currentTitle)
+        print("riascolto_Audio -> start")
         if self.play_: 
             ## he need to stop:
             self.editor.setEnabled(True)
@@ -379,6 +384,7 @@ class Ui_self(QtWidgets.QMainWindow):
             self.play_ = False
             return
         
+        self.player.setVolume(100)
         self.player.play()
 
         self.play_ = True

@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
+
 # -*- coding: utf-8 -*-
 
 import time
@@ -103,7 +104,8 @@ class Ui_self(QtWidgets.QMainWindow):
         if self.path is None or self.path == '':
             self.path = os.getcwd()
 
-
+        import shutil
+        
         try:
             with open("indice.json") as indice:
                 indice_base = json.load(indice)

@@ -39,34 +39,25 @@ setup(
     data_files = [
         ('images/', 
             findImages()
-
-        #[
-        #    'writernote.desktop', 
-        #    'writernote/indice.json',
-        #    
-        #    #'writernote/images/applicationa-image.png',
-        #    #'arrow-continue.png',
-        #    #'arrow-curve.png',
-        #    #'audio_import.jpeg',
-        #    #'audio_import.png',
-        #    #'blue-folder-open-document.png',
-        #    #'clipboard-paste-document-text.png',
-        #    #'control-pause.png',
-        #    #'control.png',
-
-        #    ]
         )
     ],
     package_dir = {"": "writernote"},
 
-    #package_data = {
-    #    'images':['images/*']
-    #},
-    #include_package_data = True,
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)'
     ],
+    #install_requires=[
+    #  'setuptools',
+    #   'wheel',
+    #   'pydub',
+    #   'SpeechRecognition',
+    #   'psutil',
+    #   'googletrans',
+    #   'nvpy',
+    #   'Wave',
+    #   'pytesseract'
+    #]
 )
 
 

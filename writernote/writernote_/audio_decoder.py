@@ -11,7 +11,6 @@ from pydub import AudioSegment
 from googletrans import Translator
 from random import randrange
 from datetime import datetime
-import cv2
 import pytesseract
 import io
 import sys

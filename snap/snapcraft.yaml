@@ -10,13 +10,21 @@ description: |
 grade: devel
 #confinement: devmode
 confinement: strict
-base: core18
+base: core20
+
 
 
 apps:
   writernote:
     command-chain: ["snap/command-chain/alsa-launch"]
-    command: desktop-launch $SNAP/bin/writernote
+    command: bin/desktop-launch $SNAP/bin/writernote
+
+    # enviroment for core20
+    environment:
+    #  #LD_LIBRARY_PATH: $SNAP/lib/python3.8/site-packages
+      PYTHONPATH: $SNAP/lib/python3.8/site-packages:$SNAP/usr/lib/python3/dist-packages
+      #PYTHONPATH: $SNAP/usr/lib/python3/dist-packages
+
     plugs:
       - alsa
       - desktop
@@ -42,11 +50,19 @@ apps:
       - removable-media
       - screen-inhibit-control
       - dvb
-      - jack1
+      #- jack1
       - avahi-control
 
     slots:
       - mpris
+
+
+layout:
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib:
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib
+
+  /usr/share/X11:
+    bind: $SNAP/usr/share/X11
 
 plugs:
   gsettings:
@@ -67,9 +83,7 @@ plugs:
     target: $SNAP/qt551
     default-provider: qt551
 
-layout:
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib:
-    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib
+
 
 parts:
   alsa-mixin:
@@ -112,21 +126,63 @@ parts:
   writernote:
     after: [desktop-qt5, alsa-mixin]
     plugin: python
-    python-version: python3
+    #python-version: python3
     source: .
 
-
+    # setting enviroment for python3 for the gcc [Python.h]
+    build-environment:
+      - C_INCLUDE_PATH: /usr/include/python3.8/
 
     build-packages:
+      - build-essential
       - python3
+      - python3.8-dev
+      - python3-dev
       - python3-pyqt5
+      - libpython3-dev
+      - python3-setuptools
       - execstack
       - libasound2-dev
       - gcc
       - libopus-dev
-      - libortp9
+      - python3-pip
+      - python3-wheel
+      - python3-venv
+      - python3-minimal
+      - python3-pkg-resources
+      - python3.8-minimal
+      - libpython3-stdlib
+      - libpython3.8-stdlib
+    
+      #  - libortp9
+
+    # correct problem with core20
+    #override-build: |
+    #  echo INSTALL PYTHON PACKAGE
+    #  python3 -m pip install pydub 
+    #  python3 -m pip install psutil 
+    #  python3 -m pip install googletrans 
+    #  python3 -m pip install nvpy
+    #  python3 -m pip install Wave 
+    #  python3 -m pip install pytesseract 
+    #  python3 -m pip install SpeechRecognition
+    #  echo INSTALLING FINISHED
 
     stage-packages:
+      # implementation for core20
+      - libpython3-stdlib
+      - libpython3.8-stdlib
+      - libpython3.8-minimal
+      - libgfortran-10-dev # for shared library in numpy
+      - python3-pip
+      - python3-wheel
+      - python3-setuptools
+      - python3-venv
+      - python3-minimal
+      - python3-pkg-resources
+      - python3.8-minimal
+      #- python3-numpy
+
       - python3
       - libc-bin
       - locales
@@ -135,16 +191,16 @@ parts:
       - ffmpeg
       - python3-tk
       - python3-pyaudio
-      - python-pyaudio
+      #- python-pyaudio # not available on core20, in core 18 yes
       - qt5-gtk-platformtheme
       - python3-pyqt5.qtwebengine
       - python3-apt
       - python3-pyqt5.qtmultimedia
       - python3-distutils     
-      - python3-nanomsg
+      
+      #- try: python3-nanomsg #not available on core20, in core 18 yes
       - libmpfr6
       - libgmp10
-      - python3-opencv
       - libqt5multimedia5-plugins
       - libcanberra-gtk-module 
       - libcanberra-gtk3-module
@@ -155,17 +211,90 @@ parts:
       #- libortop9
     
     python-packages:
-      - setuptools==45.2.0
+      - setuptools #>=45.2.0
       - wheel
       - pydub
       - SpeechRecognition
-      - psutil
+      - psutil #>=5.7.2
       - googletrans
       - nvpy
+      #- numpy
       #- PyQt5
       #- multiprocessing==2.6.2.1
       - Wave
-      - opencv-python
+      #- opencv-python
       - pytesseract
       
   
+  qt5-xdgdesktopportal-platform:
+    plugin: nil
+    stage-packages:
+      - qt5-xdgdesktopportal-platformtheme
+
+  # Qt checks that ibus-daemon binary is present, otherwise doesn't work
+  ibus:
+    plugin: nil
+    stage-packages:
+      - ibus
+
+  ffmpeg:
+    plugin: nil
+    build-packages:
+      - libavcodec-dev
+      - libavformat-dev
+      - libavutil-dev
+      - libswresample-dev
+      - libswscale-dev
+    stage-packages:
+      - libavcodec58
+      - libavformat58
+      - libavutil56
+      - libswresample3
+      - libswscale5
+
+
+  qtwayland:
+    source: https://github.com/qt/qtwayland.git
+    source-depth: 1
+    source-tag: v5.12.8
+    plugin: dump
+    
+    override-build: |
+      echo START COMPILE QTWAYLAND WITH
+      nproc
+
+      qmake
+      make -j$(nproc)
+      make INSTALL_ROOT="$SNAPCRAFT_PART_INSTALL" install
+    stage: [-./usr/lib]
+    prime: [-./*]
+    after:
+      - desktop-qt5
+
+  webrtc:
+    source: https://github.com/desktop-app/tg_owt.git
+    source-depth: 1
+    plugin: cmake
+    build-packages:
+      - yasm
+      - libjpeg8-dev
+      - pkg-config
+      - apt-utils
+      - libpulse-dev
+      - libopus-dev
+      - libssl-dev
+    stage-packages:
+      - libjpeg8
+      - libopus0
+      - libssl1.1
+      
+    override-build: |
+      echo START COMPILE webrtc WITH
+      nproc
+
+      cmake "$SNAPCRAFT_PART_SRC" -DCMAKE_BUILD_TYPE=Release
+      cmake --build . -- -j$(nproc)
+      cp -a . "$SNAPCRAFT_PART_INSTALL"
+    organize:
+      "*": tg_owt/
+    prime: [-./*]

@@ -13,6 +13,10 @@ confinement: strict
 base: core20
 
 
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+  - build-on: armhf
 
 apps:
   writernote:
@@ -50,8 +54,7 @@ apps:
       - removable-media
       - screen-inhibit-control
       - dvb
-      #- jack1
-      - avahi-control
+
 
     slots:
       - mpris
@@ -60,6 +63,9 @@ apps:
 layout:
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib:
     bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib
+
+  /usr/share/alsa:
+    bind: $SNAP/usr/share/alsa
 
   /usr/share/X11:
     bind: $SNAP/usr/share/X11

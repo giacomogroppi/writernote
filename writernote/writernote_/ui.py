@@ -374,7 +374,7 @@ class Ui_self(QtWidgets.QMainWindow):
             json.dump(self.indice, fileD)
 
 
-    def riascolto_Audio(self):
+    def riascolto_Audio(self) -> None:
         """ Funzione del self che permette di riascoltare l'audio del copybook """
         print("riascolto_Audio -> start")
         if self.play_: 
@@ -386,8 +386,11 @@ class Ui_self(QtWidgets.QMainWindow):
             self.play_ = False
             return
         
-        self.player.setVolume(100)
         self.player.play()
+        print("mediaStatus: {}".format(self.player.mediaStatus()))
+        print("state: {}".format(self.player.state()))
+
+        print("bufferStatus: {}".format(self.player.bufferStatus()))
 
         self.play_ = True
 
@@ -1054,7 +1057,8 @@ class Ui_self(QtWidgets.QMainWindow):
         
     
         self.currentTime = int(str(h) + str(m) + str(s) if h else str(m) + str(s))
-        
+        print("Audio time: {}".format(self.currentTime))
+
         if self.play_:
             try:
                 position = self.currentTitleJSON['posizione_iniz'].index(str(self.currentTime))
@@ -1075,7 +1079,7 @@ class Ui_self(QtWidgets.QMainWindow):
             
         
         self.timeSlider.blockSignals(True)
-        
+
         if self.player.duration() != 0:
             self.timeSlider.setValue(position/self.player.duration()*100)
         
@@ -1172,10 +1176,13 @@ class Ui_self(QtWidgets.QMainWindow):
         
 
         # Creazione del QMediaPlayer()
+        #self.player = QtMultimedia.QMediaPlayer()
         self.player = QtMultimedia.QMediaPlayer()
         
+
+        print("buffer status __init__ : {}".format(self.player.bufferStatus()))
+
         self.player.positionChanged.connect(self.update_position_audio)
-        
 
         # Play button
         self.playButton = QtWidgets.QPushButton(self.centralWidget)
@@ -1406,7 +1413,7 @@ class Ui_self(QtWidgets.QMainWindow):
         self.Audio_option_menu = self.menuBar().addMenu("&Audio Option")
         
         # definizione del qthread per il riascolto dell'audio
-        self.threadpool = QThreadPool()
+        #self.threadpool = QThreadPool()
 
         self.riascoltoAudio = QAction(QIcon(os.path.join(pathFolder + 'images', 'manoIcon.png')), "Listen current audio", self)
         self.riascoltoAudio.setStatusTip("Undo last change")

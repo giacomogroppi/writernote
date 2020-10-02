@@ -14,6 +14,7 @@ def findImages() -> list:
             name.append("writernote/images/" + x)
     
     finale = ['writernote/indice.json',
+            'writernote/permission.json',
             'writernote/default_file.json',
             'writernote/config.json',
             'writernote/images/importVideo.png']

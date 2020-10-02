@@ -164,7 +164,7 @@ class Ui_self(QtWidgets.QMainWindow):
             print("close without saving")
             shutil.rmtree("/tmp/writernote/" + self.temp_)
             event.accept()
-            return False
+            
 
         elif variableClose == 2097152: 
             ''' Close '''
@@ -960,6 +960,14 @@ class Ui_self(QtWidgets.QMainWindow):
 
         return nameAudioPosition
 
+
+    def callBack(self, item) -> dialog_critical:
+        print("callback string: {}".format(item))
+        
+        
+        #testo = "We had a problem while recording audio, to enable it type\nsudo snap connect writernote:record-audio \nin the terminal\n\nFor any problem write an email to giamg01@gmail.com"
+        #self.dialog_critical(testo)
+    
     def record_to_file(self, method):
         if self.currentTitle is None:
             self.dialog_critical("You need to select a title in the left of the window")
@@ -970,10 +978,6 @@ class Ui_self(QtWidgets.QMainWindow):
         #self.CHUNK_SIZE = 1024
         #self.FORMAT = pyaudio.paInt16
         #self.RATE = 44100
-
-        def callBack(item):
-            print("callback: ", item)
-
 
         if method == 'start':
             print("multiprocessing1")
@@ -995,7 +999,7 @@ class Ui_self(QtWidgets.QMainWindow):
                     self.temp_, 
                     self.indice, 
                     self.currentTitle), 
-                error_callback=callBack
+                error_callback=self.callBack
                 )
             print("multiprocessing5")
             
@@ -1104,6 +1108,60 @@ class Ui_self(QtWidgets.QMainWindow):
         print("stop_riascolto_audio -> stop")
 
     def startRecording(self):
+        ''' manage the permission for snapcraft [audio-record] plug'''
+        #try:
+        #    THRESHOLD = 500
+        #    CHUNK_SIZE = 1024
+        #    FORMAT = pyaudio.paInt16
+        #    RATE = 44100
+        #    audioTemp = pyaudio.PyAudio()
+        #    
+        #    streamTemp = audioTemp.open(format=FORMAT, channels=1, rate=RATE,
+        #        input=True, output=True,
+        #        frames_per_buffer=CHUNK_SIZE)
+
+        #    streamTemp.stop_stream()
+        #    streamTemp.close()
+        #    
+        #    audioTemp.terminate()
+        #    del audioTemp, streamTemp
+        #except:
+        #    testo = "We had a problem while recording audio, to enable it type\nsudo snap connect writernote:record-audio \nin the terminal"
+        #    return self.dialog_critical(testo) 
+        permissionpath = 'permission.json'
+        try:
+            with open(permissionpath) as permission:
+                permission = json.load(permission)
+        except FileNotFoundError:
+            ''' snapcraft PATH '''
+            path_ = QtCore.__file__.split("/")
+            path_ = path_[1:len(path_)-6]
+
+            path = '/'
+            for x in path_: 
+                path += x + "/"
+            permissionpath = path + "images/permission.json"
+            with open(path + "images/permission.json") as permission:
+                permission = json.load(permission)
+            
+        if not permission['record']:
+            ''' if it is false '''
+            check = QtWidgets.QMessageBox.question(self,
+                                         "Check",
+                                         "Did you check the permission of writernote to record audio?\nto do that you need to type in the terminal\nsnap connect writernote:audio-record\n\nAnd click yes when you have done it",
+                                         QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No
+                                         )
+
+
+            variable, _ = check.as_integer_ratio()
+            
+            if variable == 16384:
+                permission['record'] = True
+                with open(permissionpath, 'w') as permission_: json.dump(permission, permission_)
+            elif variable == 65536:
+                with open(permissionpath, 'w') as permission_: json.dump(permission, permission_)
+                return False
+
         self.registrare_actionStop.setEnabled(True)
         self.registrare_action.setEnabled(False)
         self.tempoAudioRegistazione = int(time.time())

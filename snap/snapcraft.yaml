@@ -7,11 +7,10 @@ description: |
   writernote is a multiplatform application that allows you to take notes by recording audio, 
   translate it later into text, and listen to it in an intelligent way.
 
-grade: devel
-#confinement: devmode
+grade: stable
+#confinement: classic
 confinement: strict
 base: core20
-
 
 architectures:
   - build-on: amd64
@@ -27,11 +26,10 @@ apps:
     environment:
     #  #LD_LIBRARY_PATH: $SNAP/lib/python3.8/site-packages
       PYTHONPATH: $SNAP/lib/python3.8/site-packages:$SNAP/usr/lib/python3/dist-packages
-      #ALSA_CONFIG_PATH: $SNAP/usr/share/alsa
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
     
     plugs:
-      - alsa
+      #- alsa
       - desktop
       - desktop-legacy
       - wayland
@@ -47,15 +45,15 @@ apps:
       - network-bind
       - audio-playback
       - network-manager
-      - process-control
-      - mount-observe
+      #- process-control
+      #- mount-observe
 
-      - optical-drive
-      - removable-media
-      - screen-inhibit-control
+      #- optical-drive
+      #- removable-media
+      #- screen-inhibit-control
   
-    #slots:
-    #  - mpris
+    slots:
+      - mpris
 
 
 layout:
@@ -65,8 +63,8 @@ layout:
   /usr/share/alsa:
     bind: $SNAP/usr/share/alsa
 
-  /usr/share/X11:
-    bind: $SNAP/usr/share/X11
+  #/usr/share/X11:
+  #  bind: $SNAP/usr/share/X11
 
 plugs:
   gsettings:
@@ -89,62 +87,6 @@ plugs:
 
 
 parts:
-  #test for alsa
-  alsa-lib:
-    plugin: autotools
-    source: http://archive.ubuntu.com/ubuntu/pool/main/a/alsa-lib/alsa-lib_1.1.3.orig.tar.bz2
-    # source: ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.1.5.tar.bz2
-    autotools-configure-parameters:
-      - --prefix=/usr
-      - --sysconfdir=/etc
-      - --libexec=/usr/lib
-      - --libdir=/usr/lib
-      - --localstatedir=/var
-      - --with-configdir=/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa
-      - --with-plugindir=/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/lib/alsa-lib
-      - --disable-static
-    organize:
-      snap/*/current/usr/lib/*: usr/lib/
-    stage:
-    - usr/include
-    - usr/lib
-    prime:
-      - -usr/bin
-      - -usr/include
-      - -usr/lib/pkgconfig
-      - -usr/share/alsa/alsa.conf
-      - -usr/share/alsa/pcm
-      - -usr/share/alsa/topology/broadwell
-
-  
-
-  alsa:
-    alsa-lib:
-    plugin: autotools
-    source: http://archive.ubuntu.com/ubuntu/pool/main/a/alsa-lib/alsa-lib_1.1.3.orig.tar.bz2
-    # source: ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.1.5.tar.bz2
-    autotools-configure-parameters:
-      - --prefix=/usr
-      - --sysconfdir=/etc
-      - --libexec=/usr/lib
-      - --libdir=/usr/lib
-      - --localstatedir=/var
-      - --with-configdir=/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa
-      - --with-plugindir=/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/lib/alsa-lib
-      - --disable-static
-    organize:
-      snap/*/current/usr/lib/*: usr/lib/
-    stage:
-      - usr/include
-      - usr/lib
-    prime:
-      - -usr/bin
-      - -usr/include
-      - -usr/lib/pkgconfig
-      - -usr/share/alsa/alsa.conf
-      - -usr/share/alsa/pcm
-      - -usr/share/alsa/topology/broadwell
-
   alsa-mixin:
     plugin: dump
     source: https://github.com/diddlesnaps/snapcraft-alsa.git
@@ -156,52 +98,8 @@ parts:
       - libasound2-plugins
 
 
-  alsa:
-    plugin: nil
-    after: [alsa-lib, alsa-mixin]
-    override-build: |
-      snapcraftctl build
-      cat > alsa.conf <<EOF
-      pcm.!default {
-        type pulse
-        fallback "sysdefault"
-        hint {
-          show on
-          description "Default ALSA Output (currently PulseAudio Sound Server)"
-        }
-      }
-
-      ctl.!default {
-        type pulse
-        fallback "sysdefault"
-      }
-      EOF
-
-      cat > pulsify-alsa <<EOF
-      #!/bin/bash
-      if [ "\$SNAP_ARCH" == "amd64" ]; then
-        ARCH="amd64-linux-gnu"
-      elif [ "\$SNAP_ARCH" == "armhf" ]; then
-        ARCH="arm-linux-gnueabihf"
-      elif [ "\$SNAP_ARCH" == "arm64" ]; then
-        ARCH="aarch64-linux-gnu"
-      else
-        ARCH="\$SNAP_ARCH-linux-gnu"
-      fi
-      export LD_LIBRARY_PATH="\$SNAP/usr/lib/alsa-lib:\$SNAP/usr/lib/\$ARCH/pulseaudio:\$LD_LIBRARY_PATH"
-      export ALSA_CONFIG_PATH="\$SNAP/etc/alsa.conf"
-      exec "\$@"
-      EOF
-    
-      install -m644 -D -t $SNAPCRAFT_PART_INSTALL/etc alsa.conf
-      install -m755 -D -t $SNAPCRAFT_PART_INSTALL/bin pulsify-alsa
-  
-    #remove install: | [core18 don't support it]
-
-
-
   writernote:
-    after: [desktop-qt5, alsa-lib]
+    after: [desktop-qt5, alsa-mixin]
     plugin: python
     source: .
 
@@ -210,6 +108,7 @@ parts:
       - C_INCLUDE_PATH: /usr/include/python3.8/
 
     build-packages:
+      #- ffmpeg
       #for qt
       - libxcb-xinerama0-dev
       - qt5-default
@@ -295,13 +194,11 @@ parts:
       - gstreamer1.0-gtk3 
       - gstreamer1.0-qt5 
       - gstreamer1.0-pulseaudio
-
-
-      #qmultimedia
-      #for qt
+      
+      ##qmultimedia
+      ##for qt
       - libxcb-xinerama0-dev
       - qt5-default
-      #- ^libxcb.*-dev
       - libx11-xcb-dev 
       - libglu1-mesa-dev 
       - libxrender-dev 
@@ -332,8 +229,6 @@ parts:
       - libgstreamer-plugins-good1.0-dev 
       - libgstreamer-plugins-bad1.0-dev
 
-
-
       #tg
       - qt5-image-formats-plugins
       - qtwayland5
@@ -350,14 +245,13 @@ parts:
       - zlib1g
 
       # alsa for qt
-      #- libasound2-dev 
-      - pulseaudio
+      - libasound2-dev 
+      #- pulseaudio
 
       # implementation for core20
       - libpython3-stdlib
       - libpython3.8-stdlib
       - libpython3.8-minimal
-      #- libgfortran-10-dev # for shared library in numpy
       - python3-pip
       - python3-wheel
       - python3-setuptools
@@ -365,7 +259,6 @@ parts:
       - python3-minimal
       - python3-pkg-resources
       - python3.8-minimal
-      #- python3-numpy
 
       - python3
       #- libc-bin
@@ -380,7 +273,7 @@ parts:
       - python3-apt
       - python3-pyqt5.qtmultimedia
       - python3-distutils     
-      #- ffmpeg
+      - ffmpeg
       #- try: python3-nanomsg #not available on core20, in core 18 yes
       #- libmpfr6
       #- libgmp10
@@ -388,8 +281,7 @@ parts:
 
       - libcanberra-gtk-module 
       - libcanberra-gtk3-module
-      #- libasound-dev
-      #- libasound2-plugins
+      - libasound2-plugins
       # audio
       #- libasound0
       #- libortop9
@@ -402,11 +294,7 @@ parts:
       - psutil #>=5.7.2
       - googletrans
       - nvpy
-      #- numpy
-      #- PyQt5
-      #- multiprocessing==2.6.2.1
       - Wave
-      #- opencv-python
       - pytesseract
       
   
@@ -421,383 +309,6 @@ parts:
     stage-packages:
       - ibus
 
-  ffmpeg:
-    after:
-    - selective-checkout
-
-    build-packages:
-    ### Dynamic-linking safe dependencies
-    - ladspa-sdk
-    - libass-dev
-    - libbluray-dev
-    - libbs2b-dev
-    - libcaca-dev
-    - libfreetype6-dev
-    - libgmp-dev
-    - libmp3lame-dev
-    - libopencore-amrnb-dev
-    - libopencore-amrwb-dev
-    - libopus-dev
-    - libsdl1.2-dev
-    - libtheora-dev
-    - libva-dev
-    - libvdpau-dev
-    - libvorbis-dev
-    - libvo-amrwbenc-dev
-    - libvpx-dev
-    - libxcb-shm0-dev
-    - libxcb-xfixes0-dev
-    - libxcb1-dev
-    - pkg-config
-    - texinfo
-    - yasm
-    - zlib1g-dev
-
-    ### GPL dependencies
-    #- frei0r-plugins-dev
-    #- libcdio-paranoia-dev
-    #- librubberband-dev
-    #- libx264-dev
-    #- libx265-dev
-    #- libxvidcore-dev
-
-    ### GPLv3 dependencies
-    #- libsmbclient-dev
-
-    ### non-free dependencies
-    #- libfdk-aac-dev
-
-    plugin: autotools
-    autotools-configure-parameters:
-      - --prefix=/
-
-      ### Comment out the `--disable-static` flag to allow static-linking to LGPL code
-      ### **The linked product will become LGPL if statically linked**
-      #- --disable-static
-      - --enable-shared
-      #- --disable-shared
-
-      ### The following flags allow linking to (L)GPLv3-compatible code
-      ### **The linked product will become (L)GPLv3 if (statically) linked**
-      - --enable-version3
-
-      # enable gmp, needed for rtmp(t)e support if openssl or librtmp is not used
-      # FIXME: Not enabled in Debian...?
-      - --enable-gmp
-
-      # enable AMR-NB de/encoding via libopencore-amrnb
-      # LEGAL: #apache-v2
-      - --enable-libopencore-amrnb
-
-      # enable AMR-WB decoding via libopencore-amrwb
-      # LEGAL: #apache-v2
-      - --enable-libopencore-amrwb
-
-      # enable AMR-WB encoding via libvo-amrwbenc
-      # LEGAL: #apache-v2
-      - --enable-libvo-amrwbenc
-
-      # enable Rockchip Media Process Platform code
-      # http://opensource.rock-chips.com/wiki_Mpp
-      # DISABLED: Unknown use cases, unknown licensing model
-      #- --enable-rkmpp
-
-      ### The following flags allow linking to GPL code
-      ### **The linked product will become GPL**
-      #- --enable-gpl
-
-      # enable reading of AviSynth script files
-      #- --enable-avisynth
-
-      # enable audio CD grabbing with libcdio
-      #- --enable-libcdio
-
-      # enable frei0r video filtering
-      #- --enable-frei0r
-
-      # enable rubberband needed for rubberband filter
-      #- --enable-librubberband
-
-      # enable video stabilization using vid.stab
-      # FIXME: Dependency not available in Ubuntu 16.04
-      #- --enable-libvidstab
-
-      # enable H.264 encoding via x264
-      #- --enable-libx264
-
-      # enable HEVC encoding via x265
-      #- --enable-libx265
-
-      # enable AVS encoding via xavs
-      # FIXME: Dependency not available in Ubuntu 16.04
-      #- --enable-libxavs
-
-      # enable Xvid encoding via xvidcore, native MPEG-4/Xvid encoder exists
-      #- --enable-libxvid
-
-      ### Allow linking to GPLv3 code
-      ### **The linked product will become GPLv3**
-      # Samba protocol support
-      #- --enable-libsmbclient
-
-      ### The following flags allow linking to non-free code
-      ### **The resulting snap will not be redistributable**
-      #- --enable-nonfree
-
-      # enable Blackmagic DeckLink I/O support
-      #- --enable-decklink
-
-      # enable Newteck NDI I/O support
-      #- --enable-libndi_newtek
-
-      # enable AAC de/encoding via libfdk-aac
-      #- --enable-libfdk-aac
-
-      # enable openssl, needed for https support if gnutls is not used
-      # --enable-openssl
-
-      ### The following flags are free from copyright compliance concerns
-      ### **if dynamically linked**
-      # enable libavresample build
-      # FIXME: Also `--disable-filter`ed in Debian packaging, why?
-      - --enable-avresample
-      - --disable-filter=resample
-
-      # enable LADSPA audio filtering
-      - --enable-ladspa
-
-      # enable libass subtitles rendering, needed for subtitles and ass filter
-      - --enable-libass
-
-      # enable BluRay reading using libbluray
-      - --enable-libbluray
-
-      # enable bs2b DSP library
-      - --enable-libbs2b
-
-      # enable textual display using libcaca
-      - --enable-libcaca
-
-      # enable libfreetype, needed for drawtext filter
-      - --enable-libfreetype
-
-      # enable MP3 encoding via libmp3lame
-      - --enable-libmp3lame
-
-      # enable Opus de/encoding via libopus
-      - --enable-libopus
-
-      # enable Theora encoding via libtheora
-      - --enable-libtheora
-
-      # enable Vorbis en/decoding via libvorbis, native implementation exists
-      - --enable-libvorbis
-
-      # enable VP8 and VP9 de/encoding via libvpx
-      - --enable-libvpx
-
-    source: git://source.ffmpeg.org/ffmpeg.git
-    source-type: git
-    source-branch: release/4.1
-    source-depth: 30
-    override-pull: |
-      set -o nounset
-
-      snapcraftctl pull
-      "$SNAPCRAFT_STAGE"/scriptlets/selective-checkout \
-        --append-packaging-revision \
-        --release-tag-prefix=n
-
-    stage-packages:
-    ### Dynamic-linking safe dependencies
-    - libasound2
-    - libass9
-    - libbluray2
-    - libbs2b0
-    - libcaca0
-    - libdrm2
-    - libfontconfig1
-    - libfribidi0
-    - libgmp10
-    - libgraphite2-3
-    - libharfbuzz0b
-    - libmp3lame0
-    - try:
-      - libnuma1
-    - libogg0
-    - libopencore-amrnb0
-    - libopencore-amrwb0
-    - libopus0
-    - libslang2
-    - libtheora0
-    - libva-drm2
-    - libva-x11-2
-    - libva2
-    - libvdpau1
-    - libvo-amrwbenc0
-    - libvorbis0a
-    - libvorbisenc2
-    #- libvpx5
-    - libx11-6
-    - libxau6
-    - libxcb-shape0
-    - libxcb-shm0
-    - libxcb-xfixes0
-    - libxdmcp6
-    - libxext6
-    - libxfixes3
-
-
-    filesets:
-      docs:
-      - share/doc
-
-      docs-copyright:
-      - usr/share/doc/*/copyright
-
-      docs-examples:
-      - share/ffmpeg/examples/*
-
-      docs-manpages:
-      - share/man/*
-
-      executables:
-      - bin/*
-
-      library-headers:
-      - include/*
-
-      library-pkgconfig:
-      - lib/pkgconfig/*
-
-      library-shared:
-      - lib/**/*.so*
-      - -lib/$SNAPCRAFT_ARCH_TRIPLET/*
-
-      library-static:
-      - lib/**/*.a
-
-      misc:
-      - etc/*
-      - usr/share/alsa/*
-      - usr/share/bug/*
-      - usr/share/fonts/*
-      - usr/share/libdrm/*
-      - usr/share/lintian/*
-      - usr/share/man/*
-      - usr/share/X11/*
-      - var/*
-
-    stage:
-    - $docs
-    - $docs-copyright
-    - $docs-examples
-    - $docs-manpages
-    - $executables
-    - $library-headers
-    - $library-pkgconfig
-    - $library-shared
-    - $library-static
-
-    prime:
-    - $docs
-    - $docs-copyright
-    - $docs-examples
-    - $docs-manpages
-    - $library-headers
-    - $library-pkgconfig
-    - $library-shared
-    - $library-static
-
-  selective-checkout:
-    plugin: nil
-    build-packages:
-    - git
-    stage-snaps:
-    - selective-checkout/latest/edge
-    prime:
-    - -*
-
-
-  #qtwayland:
-  #  source: https://github.com/qt/qtwayland.git
-  #  source-depth: 1
-  #  source-tag: v5.12.8
-  #  plugin: dump
-  #  
-  #  override-build: |
-  #    echo START COMPILE QTWAYLAND WITH
-  #    nproc
-#
-  #    qmake
-  #    make -j$(nproc)
-  #    make INSTALL_ROOT="$SNAPCRAFT_PART_INSTALL" install
-  #  stage: [-./usr/lib]
-  #  prime: [-./*]
-  #  after:
-  #    - desktop-qt5
-#
-  #openal:
-  #  source: https://github.com/kcat/openal-soft.git
-  #  source-depth: 1
-  #  source-tag: openal-soft-1.20.1
-  #  plugin: cmake
-  #  build-packages:
-  #    - libasound2-dev
-  #    - libpulse-dev
-  #    - libsndio-dev
-  #    - portaudio19-dev
-  #  stage-packages:
-  #    - libasound2
-  #    - libpulse0
-  #    - libportaudio2
-  #    - libsndio7.0
-  #  cmake-parameters:
-  #    - -DCMAKE_BUILD_TYPE=Release
-  #    - -DCMAKE_INSTALL_PREFIX=/usr
-  #    - -DALSOFT_EXAMPLES=OFF
-  #    - -DALSOFT_TESTS=OFF
-  #    - -DALSOFT_UTILS=OFF
-  #    - -DALSOFT_CONFIG=OFF
-  #  prime:
-  #    - -./usr/include
-  #    - -./usr/lib/cmake
-  #    - -./usr/lib/pkgconfig
-#
-    #organize:
-    #  openal: /usr/share/openal
-
-  #webrtc:
-  #  source: https://github.com/desktop-app/tg_owt.git
-  #  source-depth: 1
-  #  plugin: cmake
-  #  build-packages:
-  #    - yasm
-  #    - libjpeg8-dev
-  #    - pkg-config
-  #    - apt-utils
-  #    - libpulse-dev
-  #    - libopus-dev
-  #    - libssl-dev
-  #  stage-packages:
-  #    - libjpeg8
-  #    - libopus0
-  #    - libssl1.1
-  #    
-  #  override-build: |
-  #    echo START COMPILE webrtc WITH
-  #    nproc
-#
-  #    cmake "$SNAPCRAFT_PART_SRC" -DCMAKE_BUILD_TYPE=Release
-  #    cmake --build . -- -j$(nproc)
-  #    cp -a . "$SNAPCRAFT_PART_INSTALL"
-  #  organize:
-  #    "*": tg_owt/
-  #  prime: [-./*]
-  #  after:
-  #    - ffmpeg
-#
-#
   desktop-qt5:
     source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
     source-subdir: qt

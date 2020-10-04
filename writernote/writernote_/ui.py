@@ -671,6 +671,7 @@ class Ui_self(QtWidgets.QMainWindow):
             return False
 
     def file_save(self):
+        ''' save '''
         if self.path is None or self.nameFile is None:
             # If we do not have a path, we need to use Save As.
             return self.file_saveas()
@@ -678,14 +679,50 @@ class Ui_self(QtWidgets.QMainWindow):
             self._save_to_path()
 
     def file_saveas(self):
-        if self.path is None or self.nameFile is None:
-            path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save file", "", "Text documents (*.txt);All files (*.*)")
+        ''' save as '''
+        #if self.path is None or self.nameFile is None:
+        #    path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save file", "", "Writernote file (*.writer)")
             
-            if not path:
-                # If dialog is cancelled, will return False
-                return False
+        #    if not '.writer' in path:
+        #        ''' test '''
+        #        path += '.writer'
+
+        #    if not path:
+        #        # If dialog is cancelled, will return False
+        #        return False
+
+        if self.path is not None:
+            position = self.path
+        else:
+            position = b"/home/$USER"
+
+        print(position)
+        #path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save file", position, "Writernote (*.writer);; All file (*)")
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save file", position, "Writernote (*.writer);; All file (* *.*)", initialFilter='.writer')
+
+        if path == '':
+            return False
+
+        if not '.writer' in path:
+            print(path)
+            return self.dialog_critical("You need to specify the extention '.writer'\nOtherwise I won't be able to save the file")
+
+        self.path = None
+        self.nameFile = None
+        
+        #if not '.writer' in path:
+        #    ''' test '''
+        #    path += '.writer'
+
+        if not path:
+            # If dialog is cancelled, will return False
+            return False
+
+
 
         self.scissionePATH(path)
+        
+        print(self.path, self.temp_, self.nameFile)
         self._save_to_path()
 
     def createTempFolder_(self):
@@ -806,7 +843,6 @@ class Ui_self(QtWidgets.QMainWindow):
 
         with open("/tmp/writernote/" + self.temp_ + "/indice.json", "w") as f:
             json.dump(self.indice, f)
-            ### f.write(str(self.indice))
 
         if self.currentTitle is not None:
             posizione = self.indice['file']['titolo'].index(self.currentTitle)
@@ -818,13 +854,12 @@ class Ui_self(QtWidgets.QMainWindow):
                     # se non è registrato
                     self.currentTitleJSON['testi'] = [self.editor.toHtml()]
                 
-                #print("_save_to_path ", self.currentTitleJSON)
                 json.dump(self.currentTitleJSON, c)
 
         if not zip_.compressFolder(self.path, self.temp_, self.nameFile):
-            self.dialog_critical("We had a problem, retry or check the log")
-            return False
-        else:
+            return self.dialog_critical("We had a problem, retry or check the log")
+        
+        else: 
             return True
 
 
@@ -1141,7 +1176,7 @@ class Ui_self(QtWidgets.QMainWindow):
             for x in path_: 
                 path += x + "/"
             permissionpath = path + "images/permission.json"
-            with open(path + "images/permission.json") as permission:
+            with open(permissionpath) as permission:
                 permission = json.load(permission)
             
         if not permission['record']:
@@ -1157,9 +1192,9 @@ class Ui_self(QtWidgets.QMainWindow):
             
             if variable == 16384:
                 permission['record'] = True
-                with open(permissionpath, 'w') as permission_: json.dump(permission, permission_)
+                #with open(permissionpath, 'w') as permission_: json.dump(permission, permission_)
             elif variable == 65536:
-                with open(permissionpath, 'w') as permission_: json.dump(permission, permission_)
+                ''' no '''
                 return False
 
         self.registrare_actionStop.setEnabled(True)

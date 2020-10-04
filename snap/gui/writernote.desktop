@@ -6,4 +6,6 @@ Icon=${SNAP}/meta/gui/icon-writernote.png
 Terminal=false
 Type=Application
 Encoding=UTF-8
-Categories=Network;Application;
+#MimeType=application/writernote;
+#Patterns=*.write;
+Categories=Network;Application;Utility;TextEditor;

@@ -1,5 +1,5 @@
 name: writernote
-version: 0.1.7
+version: 0.1.9
 
 summary: Writernote
 
@@ -28,6 +28,7 @@ apps:
       PYTHONPATH: $SNAP/lib/python3.8/site-packages:$SNAP/usr/lib/python3/dist-packages
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
     
+    
     plugs:
       #- alsa
       - desktop
@@ -45,11 +46,14 @@ apps:
       - network-bind
       - audio-playback
       - network-manager
+
+      - cups-control #print documents
+
       #- process-control
       #- mount-observe
 
       #- optical-drive
-      #- removable-media
+      - removable-media
       #- screen-inhibit-control
   
     slots:
@@ -63,8 +67,8 @@ layout:
   /usr/share/alsa:
     bind: $SNAP/usr/share/alsa
 
-  #/usr/share/X11:
-  #  bind: $SNAP/usr/share/X11
+  /usr/share/X11:
+    bind: $SNAP/usr/share/X11
 
 plugs:
   gsettings:

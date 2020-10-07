@@ -41,6 +41,7 @@
     sudo snap install snapcraft --classic
     git clone https://github.com/giacomogroppi/writernote.git
     cd writernote
+    multipass launch --name snapcraft-writernote 
     snapcraft
 
     sudo snap install writernote*.snap --devmode --dangerous

@@ -28,10 +28,24 @@
 
 ## Installing
   - Linux: 
+    
+    Install stable version
     ```bash
     sudo snap install writernote --edge
+    sudo snap connect writernote:audio-record
     ```
 
+    Install unstable version [last]
+    ```bash
+    sudo snap install multipass 
+    sudo snap install snapcraft --classic
+    git clone https://github.com/giacomogroppi/writernote.git
+    cd writernote
+    snapcraft
+
+    sudo snap install writernote*.snap --devmode --dangerous
+    sudo snap connect writernote:audio-record
+    ```
 
   - Windows:
   Coming soon

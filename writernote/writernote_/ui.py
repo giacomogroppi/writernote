@@ -19,7 +19,7 @@ from struct import pack
 import pyaudio
 import wave
 
-from writernote_ import zip_
+from writernote_ import zip_, data
 import shutil
 from writernote_ import audio_decoder, audioRecoder
 
@@ -74,27 +74,27 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def cambiamenti_testo(self):
         """ Funzione che viene richiamata tutte le volte che durante qualcosa viene scritto qualcosa """
-        #text = self.editor.toPlainText()[-1:]
-        
-        # tutte le volte salva tutto il codice in html, in modo da non perdere i tag
-        text = self.editor.toHtml()
-
         if self.registrazione_:
-            self.currentTitleJSON['testi'].append(text)
-            #print("\n\n nuovo :")
-            #for x in self.currentTitleJSON['testi']:
-            #    print(x)
+            text = self.editor.toHtml()
+            if float(self.currentTitleJSON['versione']) == 1.0:
+                self.currentTitleJSON['testi'].append(text)
+            
+            elif float(self.currentTitleJSON['versione']) >= 1.1:
+                self.currentTitleJSON['testi'].append(text)
+                self.currentTitleJSON['testinohtml'].append(self.editor.toPlainText())
+
+
             self.currentTitleJSON['posizione_iniz'].append(str(int(time.time()) - self.tempoAudioRegistazione))
-            self.currentFile = 0
-        
+            self.currentFile = 0        
 
     def cambiamenti_selezione(self):
-        if  self.controlloScrittura:
-            """ it means the user is not writing """
-            text = self.editor.textCursor().selectedText()
-            position = self.editor.textCursor().selectionStart()
-            print(text)
-
+        """ if the user is listening to audio """
+        if not self.play_: return False
+        
+        text = self.editor.textCursor().selectedText()
+        position = self.editor.textCursor().selectionStart()
+        
+        print("text: {}\nposition:{}".format(text, position))
 
     def closeEvent(self, event):
         if self.play_:
@@ -124,8 +124,7 @@ class Ui_self(QtWidgets.QMainWindow):
         if indice_base == self.indice:
             # It means there is no file to save
             shutil.rmtree("/tmp/writernote/" + self.temp_)
-            event.accept()
-            return True
+            return event.accept()
 
         close = QtWidgets.QMessageBox.question(self,
                                      "QUIT",
@@ -149,31 +148,27 @@ class Ui_self(QtWidgets.QMainWindow):
                     return False
             else:
                 if not self.file_save():
-                    event.ignore()
+                    return event.ignore()
                 else:
-                    event.accept()
-
-                return False       
+                    return event.accept()       
             
             shutil.rmtree("/tmp/writernote/" + self.temp_)    
             
-            event.accept()
+            return event.accept()
         
         elif variableClose == 8388608:
             ''' close without saving'''
             print("close without saving")
             shutil.rmtree("/tmp/writernote/" + self.temp_)
-            event.accept()
-            
+            return event.accept()
 
         elif variableClose == 2097152: 
             ''' Close '''
             print("close")
-            event.ignore()
-            return False
+            return event.ignore()
 
         else:
-            event.ignore()
+            return event.ignore()
 
 
     def newCopyBook(self):
@@ -386,6 +381,9 @@ class Ui_self(QtWidgets.QMainWindow):
             self.play_ = False
             return
         
+        if float(self.currentTitleJSON['versione']) > 1.1:
+            return self.dialog_critical("This file is made with a too new version of writernote, update it with type in the terminal \nsudo snap refresh writernote")
+
         self.player.play()
         print("mediaStatus: {}".format(self.player.mediaStatus()))
         print("state: {}".format(self.player.state()))
@@ -534,20 +532,21 @@ class Ui_self(QtWidgets.QMainWindow):
             with open("indice.json", 'r') as f:
                 self.indice = json.load(f)
         except FileNotFoundError:
-            ''' snapcraft PATH '''
-            path_ = QtCore.__file__.split("/")
-            path_ = path_[1:len(path_)-6]
+            try:
+                ''' snapcraft PATH '''
+                path_ = QtCore.__file__.split("/")
+                path_ = path_[1:len(path_)-6]
 
-            path = '/'
-            for x in path_: 
-                path += x + "/"
+                path = '/'
+                for x in path_: 
+                    path += x + "/"
 
-            print("PATH:",path)
-            with open(path + "images/indice.json") as f:
-                self.indice = json.load(f)
+                print("PATH:",path)
+                with open(path + "images/indice.json") as f:
+                    self.indice = json.load(f)
                 
-        except:
-            return self.dialog_critical("Sorry we had a internal problem, with the indice.json, retry.")
+            except:
+                return self.dialog_critical("Sorry we had a internal problem, with the indice.json, retry.")
 
         return True
 
@@ -608,9 +607,9 @@ class Ui_self(QtWidgets.QMainWindow):
         self.updateList_()
 
     def dialog_critical(self, s):
-        dlg = QMessageBox(self)
+        dlg = QtWidgets.MessageBox(self)
         dlg.setText(s)
-        dlg.setIcon(QMessageBox.Critical)
+        dlg.setIcon(QtWidgets.QMessageBox.Critical)
         dlg.show()
 
 
@@ -680,17 +679,6 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def file_saveas(self):
         ''' save as '''
-        #if self.path is None or self.nameFile is None:
-        #    path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save file", "", "Writernote file (*.writer)")
-            
-        #    if not '.writer' in path:
-        #        ''' test '''
-        #        path += '.writer'
-
-        #    if not path:
-        #        # If dialog is cancelled, will return False
-        #        return False
-
         if self.path is not None:
             position = self.path
         else:
@@ -702,25 +690,22 @@ class Ui_self(QtWidgets.QMainWindow):
 
         if path == '':
             return False
-
+        
         if not '.writer' in path:
             print(path)
             return self.dialog_critical("You need to specify the extention '.writer'\nOtherwise I won't be able to save the file")
 
         self.path = None
         self.nameFile = None
-        
-        #if not '.writer' in path:
-        #    ''' test '''
-        #    path += '.writer'
 
         if not path:
             # If dialog is cancelled, will return False
             return False
 
-
-
         self.scissionePATH(path)
+
+        with open(self.path + "/" + self.nameFile, 'w') as file:
+            file.write('ciao come stai?')
         
         print(self.path, self.temp_, self.nameFile)
         self._save_to_path()
@@ -834,11 +819,9 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def _save_to_path(self):
         if self.nameFile is None:
-            self.dialog_critical("You need to specify the name of the file please")
-            return False
+            return self.dialog_critical("You need to specify the name of the file please")
 
         """ salvataggio degli indici """
-
         self.indice['video_checksum'] = len(self.indice['file']['titolo'])
 
         with open("/tmp/writernote/" + self.temp_ + "/indice.json", "w") as f:
@@ -999,15 +982,11 @@ class Ui_self(QtWidgets.QMainWindow):
     def callBack(self, item) -> dialog_critical:
         print("callback string: {}".format(item))
         
-        
-        #testo = "We had a problem while recording audio, to enable it type\nsudo snap connect writernote:record-audio \nin the terminal\n\nFor any problem write an email to giamg01@gmail.com"
-        #self.dialog_critical(testo)
     
     def record_to_file(self, method):
         if self.currentTitle is None:
-            self.dialog_critical("You need to select a title in the left of the window")
-            return
-        
+            return self.dialog_critical("You need to select a title in the left of the window")
+            
         ''' can not use self variable '''
         #self.THRESHOLD = 500
         #self.CHUNK_SIZE = 1024
@@ -1105,18 +1084,24 @@ class Ui_self(QtWidgets.QMainWindow):
                 ## in caso in cui l'utente in quel secondo dell'audio non abbia detto niente -> e non ci sia niente all'interno della lista
                 return
             
-            ''' vecchia struttura dati '''
-            #testo = ''
-            #for x in self.currentTitleJSON['testi'][:position]:
-            #    testo += x
-            #self.editor.setPlainText(testo)
+            versione = float(self.currentTitleJSON['versione'])
+            if versione== 1.0:
+                ''' nuova struttura dati 1.0'''
+                testo = self.currentTitleJSON['testi'][position]
 
-            ''' nuova struttura dati '''
-            testo = self.currentTitleJSON['testi'][position]
-            self.editor.setHtml(testo)
-            
-            
-        
+                self.editor.setHtml(testo)
+
+            elif versione >= 1.1:
+                ''' next data structure '''
+                try:
+                    testoGrassetto = '<!DOCTYPE html><html><body><b>' + self.currentTitleJSON['testinohtml'][position][:-1] + '</b>' + self.currentTitleJSON['testinohtml'][-1][len(self.currentTitleJSON['testi'][position]):] + '</body></html>' 
+                except IndexError:
+                    pass
+
+                print(testoGrassetto)
+                self.editor.setHtml(testoGrassetto)
+
+
         self.timeSlider.blockSignals(True)
 
         if self.player.duration() != 0:
@@ -1144,25 +1129,6 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def startRecording(self):
         ''' manage the permission for snapcraft [audio-record] plug'''
-        #try:
-        #    THRESHOLD = 500
-        #    CHUNK_SIZE = 1024
-        #    FORMAT = pyaudio.paInt16
-        #    RATE = 44100
-        #    audioTemp = pyaudio.PyAudio()
-        #    
-        #    streamTemp = audioTemp.open(format=FORMAT, channels=1, rate=RATE,
-        #        input=True, output=True,
-        #        frames_per_buffer=CHUNK_SIZE)
-
-        #    streamTemp.stop_stream()
-        #    streamTemp.close()
-        #    
-        #    audioTemp.terminate()
-        #    del audioTemp, streamTemp
-        #except:
-        #    testo = "We had a problem while recording audio, to enable it type\nsudo snap connect writernote:record-audio \nin the terminal"
-        #    return self.dialog_critical(testo) 
         permissionpath = 'permission.json'
         try:
             with open(permissionpath) as permission:
@@ -1192,6 +1158,7 @@ class Ui_self(QtWidgets.QMainWindow):
             
             if variable == 16384:
                 permission['record'] = True
+                ''' snapcraft file system is read-only -> not working '''
                 #with open(permissionpath, 'w') as permission_: json.dump(permission, permission_)
             elif variable == 65536:
                 ''' no '''
@@ -1212,13 +1179,13 @@ class Ui_self(QtWidgets.QMainWindow):
         self.video_import.setEnabled(False)
         self.record_to_file('stop')
         self.registrazione_ = False
-        
+        self.currentTitleJSON = data.spacchettamento(self.currentTitleJSON)
 
     def setVolume(self, c):
         self.player.setVolume(c)
 
-    def undo_action(self):
-        self.editor.undo()
+    #def undo_action(self):
+    #    self.editor.undo()
 
     def cutFunction(self):
         self.editor.cut()
@@ -1509,7 +1476,7 @@ class Ui_self(QtWidgets.QMainWindow):
         #self.threadpool = QThreadPool()
 
         self.riascoltoAudio = QAction(QIcon(os.path.join(pathFolder + 'images', 'manoIcon.png')), "Listen current audio", self)
-        self.riascoltoAudio.setStatusTip("Undo last change")
+        self.riascoltoAudio.setStatusTip("List audio of the copybook")
         self.riascoltoAudio.triggered.connect(self.riascolto_Audio)
         self.Audio_option_menu.addAction(self.riascoltoAudio)
         self.Audio_toolbar.addAction(self.riascoltoAudio)

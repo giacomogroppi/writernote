@@ -607,11 +607,10 @@ class Ui_self(QtWidgets.QMainWindow):
         self.updateList_()
 
     def dialog_critical(self, s):
-        dlg = QtWidgets.MessageBox(self)
+        dlg = MessageBox(self)
         dlg.setText(s)
-        dlg.setIcon(QtWidgets.QMessageBox.Critical)
+        dlg.setIcon(QMessageBox.Critical)
         dlg.show()
-
 
     def scissionePATH(self, path):
         path = path.split('/')

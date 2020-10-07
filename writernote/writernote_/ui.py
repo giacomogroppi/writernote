@@ -607,7 +607,7 @@ class Ui_self(QtWidgets.QMainWindow):
         self.updateList_()
 
     def dialog_critical(self, s):
-        dlg = MessageBox(self)
+        dlg = QMessageBox(self)
         dlg.setText(s)
         dlg.setIcon(QMessageBox.Critical)
         dlg.show()

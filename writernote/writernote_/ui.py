@@ -1072,7 +1072,6 @@ class Ui_self(QtWidgets.QMainWindow):
         m, r = divmod(r, 60000)
         s, _ = divmod(r, 1000)
 
-
         self.currentTime = int(str(h) + str(m) + str(s) if h else str(m) + str(s))
         print("Audio time: {}".format(self.currentTime))
 

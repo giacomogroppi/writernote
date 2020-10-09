@@ -93,6 +93,22 @@ class Ui_self(QtWidgets.QMainWindow):
 
         text = self.editor.textCursor().selectedText()
         position = self.editor.textCursor().selectionStart()
+        
+        i = 1
+        while True:
+            if position >= len(self.currentTitleJSON['testinohtml'][i-1]) and position<= len(self.currentTitleJSON['testinohtml'][i+1]):
+                audio = int(self.currentTitleJSON['posizione_iniz'][position])
+                print("audio: ",audio*1000)
+                self.player.setPosition(audio*500)
+                break
+
+            if i + 1 == len(self.currentTitleJSON['testinohtml']):
+                audio = int(self.currentTitleJSON['posizione_iniz'][-1])
+                print("audio2: ", audio*1000)
+                self.player.setPosition(audio*1000)
+                break
+
+            i += 1
 
         print("text: {}\nposition:{}".format(text, position))
 
@@ -525,8 +541,6 @@ class Ui_self(QtWidgets.QMainWindow):
         self.currentTitleJSON['se_tradotto'] = True
         self.editor.setPlainText(self.currentTitleJSON['testi'][0])
 
-
-
     def caricamentoJSON(self):
         try:
             with open("indice.json", 'r') as f:
@@ -844,7 +858,6 @@ class Ui_self(QtWidgets.QMainWindow):
         else:
             return True
 
-
     def file_print(self):
         dlg = QPrintDialog()
         if dlg.exec_():
@@ -974,7 +987,6 @@ class Ui_self(QtWidgets.QMainWindow):
         wf.writeframes(r)
         wf.close()
 
-
         return nameAudioPosition
 
 
@@ -985,12 +997,6 @@ class Ui_self(QtWidgets.QMainWindow):
     def record_to_file(self, method):
         if self.currentTitle is None:
             return self.dialog_critical("You need to select a title in the left of the window")
-
-        ''' can not use self variable '''
-        #self.THRESHOLD = 500
-        #self.CHUNK_SIZE = 1024
-        #self.FORMAT = pyaudio.paInt16
-        #self.RATE = 44100
 
         if method == 'start':
             print("multiprocessing1")
@@ -1062,7 +1068,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
         self.riascolto_Audio()
         self.player.setPosition(self.position)
-
+        print(self.position)
         print("playButtonFunction -> stop")
 
 
@@ -1083,7 +1089,7 @@ class Ui_self(QtWidgets.QMainWindow):
                 return
 
             versione = float(self.currentTitleJSON['versione'])
-            if versione== 1.0:
+            if versione == 1.0:
                 ''' nuova struttura dati 1.0'''
                 testo = self.currentTitleJSON['testi'][position]
 
@@ -1092,11 +1098,14 @@ class Ui_self(QtWidgets.QMainWindow):
             elif versione >= 1.1:
                 ''' next data structure '''
                 try:
-                    testoGrassetto = '<!DOCTYPE html><html><body><b>' + self.currentTitleJSON['testinohtml'][position][:-1] + '</b>' + self.currentTitleJSON['testinohtml'][-1][len(self.currentTitleJSON['testi'][position]):] + '</body></html>'
+                    lung = len(self.currentTitleJSON['testinohtml'][position])
+                    testoGrassetto = '<!DOCTYPE html><html><body><b>' + self.currentTitleJSON['testinohtml'][position] + '</b>' 
+                    testoGrassetto += self.currentTitleJSON['testinohtml'][-1][lung:] + '</body></html>'
+
+                
                 except IndexError:
                     pass
 
-                print(testoGrassetto)
                 self.editor.setHtml(testoGrassetto)
 
 
@@ -1118,8 +1127,6 @@ class Ui_self(QtWidgets.QMainWindow):
         self.playButton.setEnabled(True)
         self.timeSlider.setEnabled(False)
         self.volumeSlider.setEnabled(True)
-
-
 
         self.player.stop()
         self.event_stop.set()

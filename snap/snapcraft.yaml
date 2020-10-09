@@ -14,15 +14,13 @@ base: core20
 
 architectures:
   - build-on: amd64
-    run-on: amd64
-
   - build-on: arm64
-    run-on: arm64
+  - build-on: armhf
 
 
 apps:
   writernote:
-    command-chain: ["snap/command-chain/alsa-launch"]
+    #command-chain: ["snap/command-chain/alsa-launch"]
     command: bin/desktop-launch $SNAP/bin/writernote
     #$SNAP/snap/command-chain/alsa-launch
     # enviroment for core20
@@ -30,7 +28,7 @@ apps:
     #  #LD_LIBRARY_PATH: $SNAP/lib/python3.8/site-packages
       PYTHONPATH: $SNAP/lib/python3.8/site-packages:$SNAP/usr/lib/python3/dist-packages
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
-      GTK_USE_PORTAL: 1
+      #GTK_USE_PORTAL: 1
     
     plugs:
       #- alsa
@@ -42,7 +40,6 @@ apps:
       - audio-record
       - home
       - pulseaudio
-      #- unity7
       - browser-support
       - network
       - gsettings
@@ -50,14 +47,8 @@ apps:
       - audio-playback
       - network-manager
 
-      - cups-control #print documents
-
-      #- process-control
-      #- mount-observe
-
-      #- optical-drive
+      - cups-control
       - removable-media
-      #- screen-inhibit-control
 
     slots:
       - mpris
@@ -74,12 +65,6 @@ layout:
 
   /usr/share/X11:
     bind: $SNAP/usr/share/X11
-
-##slots:
-##  writernote-dbus:
-##    interface: dbus
-##    bus: session
-##    name: org.gnome.Writernote
 
 plugs:
   gsettings:
@@ -100,11 +85,6 @@ plugs:
     target: $SNAP/qt551
     default-provider: qt551
   
-  ##gnome-3-28-1804:
-  ##  interface: content
-  ##  target: $SNAP/gnome-platform
-  ##  default-provider: gnome-3-28-1804:gnome-3-28-1804
-
 parts:
   alsa-mixin:
     plugin: dump
@@ -119,6 +99,8 @@ parts:
 
   writernote:
     after: [desktop-qt5, alsa-mixin]
+    #after: [desktop-qt5]
+    
     plugin: python
     source: .
 
@@ -360,10 +342,3 @@ parts:
       - locales-all
       - xdg-user-dirs
       - fcitx-frontend-qt5
-
-  # set the enviroment for qt
-  #enviromentset:
-  #  plugin: nil
-  #  after: [writernote]
-  #  override-build: | 
-  #    export GTK_USE_PORTAL=1 writernote

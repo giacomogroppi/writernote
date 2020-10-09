@@ -20,7 +20,7 @@ architectures:
 
 apps:
   writernote:
-    #command-chain: ["snap/command-chain/alsa-launch"]
+    command-chain: ["snap/command-chain/alsa-launch"]
     command: bin/desktop-launch $SNAP/bin/writernote
     #$SNAP/snap/command-chain/alsa-launch
     # enviroment for core20

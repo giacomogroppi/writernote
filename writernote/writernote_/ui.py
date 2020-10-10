@@ -71,20 +71,39 @@ class Ui_self(QtWidgets.QMainWindow):
 
         self.createTempFolder_()
 
-
     def cambiamenti_testo(self):
         """ Funzione che viene richiamata tutte le volte che durante qualcosa viene scritto qualcosa """
+        #if self.play_:
+        #    return self.dialog_critical("You cann't edit text right now")
+
         if self.registrazione_:
             text = self.editor.toHtml()
-            if float(self.currentTitleJSON['versione']) == 1.0:
-                self.currentTitleJSON['testi'].append(text)
-
-            elif float(self.currentTitleJSON['versione']) >= 1.1:
+            audio = str(int(time.time()) - self.tempoAudioRegistazione)
+            
+            if len(self.currentTitleJSON['posizione_iniz']) == 0:
                 self.currentTitleJSON['testi'].append(text)
                 self.currentTitleJSON['testinohtml'].append(self.editor.toPlainText())
+                self.currentTitleJSON['posizione_iniz'].append(audio)
+                
+                return False
 
 
-            self.currentTitleJSON['posizione_iniz'].append(str(int(time.time()) - self.tempoAudioRegistazione))
+            elif audio != self.currentTitleJSON['posizione_iniz'][-1]:
+                boolVariable = True
+            else:
+                boolVariable = False
+
+                
+            if float(self.currentTitleJSON['versione']) == 1.0 and boolVariable:
+                self.currentTitleJSON['testi'].append(text)
+                self.currentTitleJSON['posizione_iniz'].append(audio)
+
+            elif float(self.currentTitleJSON['versione']) >= 1.1 and boolVariable:
+                self.currentTitleJSON['testi'].append(text)
+                self.currentTitleJSON['testinohtml'].append(self.editor.toPlainText())
+                self.currentTitleJSON['posizione_iniz'].append(audio)
+
+            
             self.currentFile = 0
 
     def cambiamenti_selezione(self):
@@ -649,21 +668,61 @@ class Ui_self(QtWidgets.QMainWindow):
     def file_open(self, check = False):
 
         if not check:
-            path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open file", "", "Writernote file (*.writer);All files (*.*)")
+            path_, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open file", "", "Writernote file (*.writer);All files (*.*)")
         else:
-            path = self.path
+            path_ = self.path
 
         if path:
-            if not check: self.scissionePATH(path)
+            path = self.path
+            temp_ = self.temp_
+            nameFile = self.nameFile
 
-            if not os.path.exists(self.path + "/" + self.nameFile):
-                self.dialog_critical("The file didn't exist")
-                return
+            if not check: self.scissionePATH(path_)
+
+            if not os.path.exists(self.path_ + "/" + self.nameFile):
+                return self.dialog_critical("The file didn't exist")
+
+            if self.currentTitle is not None:
+                close = QtWidgets.QMessageBox.question(self,
+                                     "QUIT",
+                                     "Do you want to delete the current file?\nIt is not save",
+                                     QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Close
+                                     )
+                    
+                if close == QtWidgets.QMessageBox.Save:
+                    if nameFile is not None:    
+                        self.path = path
+                        self.temp_ = temp_
+                        self.nameFile = nameFile
+                        self._save_to_path()
+                        self.currentTitle = None
+                        self.currentTitleJSON = None
+                        
+                        ''' risistema i path come prima per aprire un nuovo file''' 
+                        if not check: self.scissionePATH(path_)
+                        
+                    elif nameFile is None:
+                        if not self.file_saveas():
+                            ''' if the save fail '''
+                            return  False
+
+                elif close == QtWidgets.QMessageBox.Discard:
+                    ''' l'utente ha deciso di non salvare '''
+                    self.currentTitleJSON = None
+                    self.currentTitle = None
+
+                else:
+                    ''' l'utente ha chiuso la finestra '''
+                    self.path = path
+                    self.temp_ = temp_
+                    self.nameFile = nameFile
+
+                    return False
 
             if not zip_.extractAll(self.nameFile, self.path, self.temp_):
                 # Se l'estrazione ha trovato qualche errore
-                self.dialog_critical("We had some problem to read the file, retry or see the log.")
-                return
+                self.indice = None
+                return self.dialog_critical("We had some problem to read the file, retry or see the log.")
 
             # Carica l'indice dalla cartella ./temporaneo
             with open("/tmp/writernote/" + self.temp_ + "/indice.json") as f:
@@ -673,11 +732,24 @@ class Ui_self(QtWidgets.QMainWindow):
             self.update_title()
             self.updateList_()
 
-
             if len(self.indice['file']['titolo']) != len(self.indice['file']['audio']) or len(self.indice['file']['titolo']) != int(self.indice['video_checksum']):
-                del self.indice
-                self.dialog_critical("The file is curropted")
-                return
+                try:
+                    with open("indice.json") as indice:
+                        self.indice_base = json.load(indice)
+                except FileNotFoundError:
+                    ''' snapcraft PATH '''
+                    path_ = QtCore.__file__.split("/")
+                    path_ = path_[1:len(path_)-6]
+
+                    path = '/'
+                    for x in path_:
+                        path += x + "/"
+
+                    with open(path + "images/indice.json") as indice:
+                        self.indice = json.load(indice)
+                    
+                    return self.dialog_critical("The file is curropted")
+                
             self.NewAudio.setEnabled(True)
         else:
             return False
@@ -717,11 +789,8 @@ class Ui_self(QtWidgets.QMainWindow):
 
         self.scissionePATH(path)
 
-        with open(self.path + "/" + self.nameFile, 'w') as file:
-            file.write('ciao come stai?')
-
         print(self.path, self.temp_, self.nameFile)
-        self._save_to_path()
+        return self._save_to_path()
 
     def createTempFolder_(self):
         """ Viene eseguita la funzione appena il programma finisce di caricare """

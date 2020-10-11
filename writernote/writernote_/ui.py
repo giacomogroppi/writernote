@@ -116,7 +116,7 @@ class Ui_self(QtWidgets.QMainWindow):
         i = 1
         while True:
             if position >= len(self.currentTitleJSON['testinohtml'][i-1]) and position<= len(self.currentTitleJSON['testinohtml'][i+1]):
-                audio = int(self.currentTitleJSON['posizione_iniz'][position])
+                audio = int(self.currentTitleJSON['posizione_iniz'][i])
                 print("audio: ",audio*1000)
                 self.player.setPosition(audio*500)
                 break
@@ -753,7 +753,7 @@ class Ui_self(QtWidgets.QMainWindow):
             self.NewAudio.setEnabled(True)
             
             self.editor.setHtml('')
-        
+            self.editor.setDisabled(True)
         else:
             return False
 

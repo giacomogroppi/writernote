@@ -72,14 +72,14 @@ def spacchettamento(text) -> dict:
 
             elif len(text['testinohtml'][i]) < len(text['testinohtml'][i-1]):
                 difference = len(text['testinohtml'][i]) - len(text['testinohtml'][i-1])
-                print("\ndifferenza: {}, contatore: {}".format(difference, i))
+                #print("\ndifferenza: {}, contatore: {}".format(difference, i))
                 text['testinohtml'][i-1] = text['testinohtml'][i-1][:difference]
 
             if len(text['testinohtml'][i]) == len(text['testinohtml'][i-1]) or text['testinohtml'][i][-1] == ' ':
-                print("lunghezza: {}, indice {}".format(len(text['testinohtml']), i))
+                #print("lunghezza: {}, indice {}".format(len(text['testinohtml']), i))
                 del text['testinohtml'][i], text['posizione_iniz'][i]
                 i -= 1
-                print("lunghezza: {}, indice {}".format(len(text), i))
+                #print("lunghezza: {}, indice {}".format(len(text), i))
 
             i += 1
 

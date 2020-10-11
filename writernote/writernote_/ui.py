@@ -672,14 +672,14 @@ class Ui_self(QtWidgets.QMainWindow):
         else:
             path_ = self.path
 
-        if path:
+        if path_:
             path = self.path
             temp_ = self.temp_
             nameFile = self.nameFile
 
             if not check: self.scissionePATH(path_)
 
-            if not os.path.exists(self.path_ + "/" + self.nameFile):
+            if not os.path.exists(self.path + "/" + self.nameFile):
                 return self.dialog_critical("The file didn't exist")
 
             if self.currentTitle is not None:
@@ -751,6 +751,9 @@ class Ui_self(QtWidgets.QMainWindow):
                     return self.dialog_critical("The file is curropted")
                 
             self.NewAudio.setEnabled(True)
+            
+            self.editor.setHtml('')
+        
         else:
             return False
 

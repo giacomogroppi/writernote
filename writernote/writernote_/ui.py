@@ -118,10 +118,10 @@ class Ui_self(QtWidgets.QMainWindow):
             if position >= len(self.currentTitleJSON['testinohtml'][i-1]) and position<= len(self.currentTitleJSON['testinohtml'][i+1]):
                 audio = int(self.currentTitleJSON['posizione_iniz'][i])
                 print("audio: ",audio*1000)
-                self.player.setPosition(audio*500)
+                self.player.setPosition(audio*1000)
                 break
 
-            if i + 1 == len(self.currentTitleJSON['testinohtml']):
+            elif i + 1 == len(self.currentTitleJSON['testinohtml']):
                 audio = int(self.currentTitleJSON['posizione_iniz'][-1])
                 print("audio2: ", audio*1000)
                 self.player.setPosition(audio*1000)
@@ -414,7 +414,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
             self.player.stop()
             self.play_ = False
-            return
+            return True
 
         if float(self.currentTitleJSON['versione']) > 1.1:
             return self.dialog_critical("This file is made with a too new version of writernote, update it with type in the terminal \nsudo snap refresh writernote")
@@ -1146,19 +1146,21 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def update_position_audio(self, position):
         ''' funzione che gestiste il riascolto dell'audio '''
-        h, r = divmod(position, 36000)
-        m, r = divmod(r, 60000)
-        s, _ = divmod(r, 1000)
-
-        self.currentTime = int(str(h) + str(m) + str(s) if h else str(m) + str(s))
+        print("position: {}".format(position))
+        #h, r = divmod(position, 36000)
+        #m, r = divmod(r, 60000)
+        #s, _ = divmod(r, 1000)
+        self.currentTime = int(position/1000)
+        #self.currentTime = int(str(h) + str(m) + str(s) if h else str(m) + str(s))
         print("Audio time: {}".format(self.currentTime))
 
         if self.play_:
             try:
                 position = self.currentTitleJSON['posizione_iniz'].index(str(self.currentTime))
-            except ValueError:
-                ## in caso in cui l'utente in quel secondo dell'audio non abbia detto niente -> e non ci sia niente all'interno della lista
-                return
+                print(self.currentTitleJSON['posizione_iniz'][position])
+            except:
+                ''' in caso la riga sia stata eliminata da data.py '''
+                return False
 
             versione = float(self.currentTitleJSON['versione'])
             if versione == 1.0:
@@ -1167,19 +1169,21 @@ class Ui_self(QtWidgets.QMainWindow):
 
                 self.editor.setHtml(testo)
 
-            elif versione >= 1.1:
+            elif versione == 1.1:
                 ''' next data structure '''
                 try:
                     lung = len(self.currentTitleJSON['testinohtml'][position])
                     testoGrassetto = '<!DOCTYPE html><html><body><b>' + self.currentTitleJSON['testinohtml'][position] + '</b>' 
                     testoGrassetto += self.currentTitleJSON['testinohtml'][-1][lung:] + '</body></html>'
-
-                
+                    print(position)
                 except IndexError:
+                    print("\nindexerror")
                     pass
 
                 self.editor.setHtml(testoGrassetto)
-
+            
+            else:
+                return self.dialog_critical("I can't play the versione {}\nUpdate writernote by type\nsudo snap refresh".format(str(versione)))
 
         self.timeSlider.blockSignals(True)
 

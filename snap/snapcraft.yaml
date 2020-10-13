@@ -1,5 +1,5 @@
 name: writernote
-version: 0.2.0
+version: 0.2.1
 
 summary: Writernote
 
@@ -298,6 +298,7 @@ parts:
     python-packages:
       - setuptools #>=45.2.0
       - wheel
+      - typing
       - pydub
       - SpeechRecognition
       - psutil #>=5.7.2

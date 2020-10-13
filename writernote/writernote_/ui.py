@@ -81,29 +81,54 @@ class Ui_self(QtWidgets.QMainWindow):
             audio = str(int(time.time()) - self.tempoAudioRegistazione)
             
             if len(self.currentTitleJSON['posizione_iniz']) == 0:
-                self.currentTitleJSON['testi'].append(text)
-                self.currentTitleJSON['testinohtml'].append(self.editor.toPlainText())
-                self.currentTitleJSON['posizione_iniz'].append(audio)
+                ''' in caso sia il primo testo che appende '''
+                self.temp = {
+                    'testinohtml': [],
+                    'posizione_iniz': [],
+                    'testi': [] 
+                }
+
+                self.temp['testi'].append(text)
+                self.temp['testinohtml'].append(self.editor.toPlainText())
+                self.temp['posizione_iniz'].append(audio)
                 
                 return False
 
 
             elif audio != self.currentTitleJSON['posizione_iniz'][-1]:
-                boolVariable = True
-            else:
-                boolVariable = False
+                ''' se si entra nel secondo dopo, va fatto l'elemento precedente'''
+                #boolVariable = True
+                self.temp = data.spacchetta(self.temp)
+                self.currentTitleJSON['posizione_iniz'].append(self.temp['posizione_iniz'])
+                self.currentTitleJSON['testinohtml'].append(self.temp['testinohtml'])
+                self.currentTitleJSON['testi'].append(self.temp['testi'])
+
+                self.temp = {
+                    'testinohtml': [],
+                    'posizione_iniz': [],
+                    'testi': [] 
+                }
+
+            #else:
+                #boolVariable = False
 
                 
-            if float(self.currentTitleJSON['versione']) == 1.0 and boolVariable:
+            if float(self.currentTitleJSON['versione']) == 1.0:
                 self.currentTitleJSON['testi'].append(text)
                 self.currentTitleJSON['posizione_iniz'].append(audio)
 
-            elif float(self.currentTitleJSON['versione']) >= 1.1 and boolVariable:
-                self.currentTitleJSON['testi'].append(text)
-                self.currentTitleJSON['testinohtml'].append(self.editor.toPlainText())
-                self.currentTitleJSON['posizione_iniz'].append(audio)
+            elif float(self.currentTitleJSON['versione']) >= 1.1:
+                ''' vecchia struttura dati -> nuova struttura dati implementa .append per ogni modifica'''
+                #self.currentTitleJSON['testi'].append(text)
+                #self.currentTitleJSON['testinohtml'].append(self.editor.toPlainText())
+                #self.currentTitleJSON['posizione_iniz'].append(audio)
+                self.temp['testi'].append(text)
+                self.temp['testinohtml'].append(self.editor.toPlainText())
+                self.temp['posizione_iniz'].append(audio)
 
-            
+
+
+
             self.currentFile = 0
 
     def cambiamenti_selezione(self):
@@ -1115,7 +1140,6 @@ class Ui_self(QtWidgets.QMainWindow):
         """ Se l'utente manualmente cambia la posizione """
         self.slider.setValue(position*1000)
 
-
     def duration_changed(self, duration):
         self.slider.setRange(0, duration)
 
@@ -1260,7 +1284,15 @@ class Ui_self(QtWidgets.QMainWindow):
         self.video_import.setEnabled(False)
         self.record_to_file('stop')
         self.registrazione_ = False
-        self.currentTitleJSON = data.spacchetta(self.currentTitleJSON)
+
+        ''' per la nuova struttura dati ''' 
+        self.temp = data.spacchetta(self.temp)
+        self.currentTitleJSON['posizione_iniz'].append(self.temp['posizione_iniz'])
+        self.currentTitleJSON['testinohtml'].append(self.temp['testinohtml'])
+        self.currentTitleJSON['testi'].append(self.temp['testi'])
+
+        ''' vecchia struttura dati ''' 
+        #self.currentTitleJSON = data.spacchetta(self.currentTitleJSON)
 
     def setVolume(self, c):
         self.player.setVolume(c)
@@ -1600,14 +1632,11 @@ class Ui_self(QtWidgets.QMainWindow):
         self.Audio_option_menu.addSeparator()
 
 
-
-
     def deleteCopyBookFunction(self, currentItem = None):
         if currentItem is None:
             currentItemTemp = currentItem
         else:
             currentItemTemp = self.currentTitle
-
 
         posizione = self.indice['file']['titolo'].index(currentItemTemp)
 
@@ -1619,6 +1648,7 @@ class Ui_self(QtWidgets.QMainWindow):
         del self.indice['file']['compressione'][posizione]
         del self.indice['file']['video'][posizione]
         del self.indice['file']['file_testo'][posizione]
+        
         self.indice['video_checksum'] -= 1
 
         self.currentTitle = None

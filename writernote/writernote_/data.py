@@ -1,4 +1,5 @@
 import json
+from typing import Dict
 
 def check(stringa)-> bool:
     i = 1
@@ -86,7 +87,7 @@ def spacchettamento(text) -> dict:
     return text
 
 
-def spacchetta(text) -> dict:
+def spacchetta(text: Dict) -> dict:
     if not isinstance(text, dict):
         text = json.load(text)
 

@@ -1,8 +1,18 @@
 import json
 
-def check(stringa)-> bool:
-    i = 1
-    while i < len(stringa):
+def checkInserimento(stringa: str) -> bool:
+    ''' controlla che ogni stringa sia contenuta in quella successiva '''
+    i = 0
+    lunghezza = len(stringa) - 1
+    while i < lunghezza:
+        if not stringa[i] in stringa[i + 1]:
+            return False
+        
+        i += 1
+        
+        
+        
+        """ da eliminare
         k = 0
         while k < len(stringa[i-1]) and k < len(stringa[i]):
             if stringa[i-1] in stringa[i]:
@@ -13,27 +23,21 @@ def check(stringa)-> bool:
                 return False
 
             k += 1
-        i += 1
-
+        i += 1"""
 
     return True
 
 def check1(text) -> bool:
-    i = 0
-    while True:
-        if (i+1) == len(text):
-            break
-
-        if i == 0:
-            pass
-        elif len(text[i]) <= len(text[i-1]) or text[i][-1] == ' ':
-            ''' false se c'è un elemento che non va bene  '''
+    i = 1
+    lunghezza = len(text)
+    while i < lunghezza:
+        if len(text[i]) <= len(text[i-1]) or text[i][-1] == ' ':
+            ''' false se la lunghezza è diversa o se c'è uno spazio '''
             return False
 
         i += 1
 
     return True
-
 
 def eliminazioneNFrasi(text: dict) -> dict:
     ''' 
@@ -66,12 +70,14 @@ def eliminazioneNFrasi(text: dict) -> dict:
 
 
 def spacchettamento(text) -> dict:
-    ''' funzione che aggiorna il testo '''
+    ''' funzione richiamata internamente che 
+    aggiunge le stringe tra di loro '''
 
-
-    while not check(text['testinohtml']):
+    ''' parte della funzione che aggiusta gli inserimenti di testo all'interno di una frase [e non alla fine] '''
+    while not checkInserimento(text['testinohtml']):
         i = 1
-        while i < len(text['testinohtml']):
+        lunghezza = len(text['testinohtml'])
+        while i < lunghezza:
             k = 0
             while k < len(text['testinohtml'][i-1]) and k < len(text['testinohtml'][i]):
                 if text['testinohtml'][i][k] != text['testinohtml'][i-1][k] and k != len(text['testinohtml'][i-1]):
@@ -82,28 +88,27 @@ def spacchettamento(text) -> dict:
 
             i += 1
 
+    ''' parte di funzione che aggiusta in caso di modifica al termina della stringa '''
     while True:
         if check1(text['testinohtml']):
             break
 
         i = 1
 
-        while True:
-            if (i+1) == len(text['testinohtml']):
-                break
-
-
-            elif len(text['testinohtml'][i]) < len(text['testinohtml'][i-1]):
+        lunghezza = len(text['testinohtml'])
+        while i < lunghezza:
+            if len(text['testinohtml'][i]) < len(text['testinohtml'][i-1]):
                 difference = len(text['testinohtml'][i]) - len(text['testinohtml'][i-1])
                 text['testinohtml'][i-1] = text['testinohtml'][i-1][:difference]
 
             if len(text['testinohtml'][i]) == len(text['testinohtml'][i-1]) or text['testinohtml'][i][-1] == ' ':
-                #print("lunghezza: {}, indice {}".format(len(text['testinohtml']), i))
                 del text['testinohtml'][i], text['posizione_iniz'][i]
-                i -= 1
-                #print("lunghezza: {}, indice {}".format(len(text), i))
-
-            i += 1
+                
+                lunghezza -= 1
+                
+            else:
+                ''' in caso entri nel primo if non deve aumentare il contatore in quanto deve rifare il controllo '''
+                i += 1
 
     return text
 

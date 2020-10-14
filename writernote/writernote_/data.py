@@ -49,7 +49,7 @@ def eliminazioneNFrasi(text: dict) -> dict:
 
     i = 1
     lunghezza = len(text['posizione_iniz'])
-    while True:
+    while i < lunghezza:
         if text['posizione_iniz'][i] == text['posizione_iniz'][i - 1]:
             ''' in questo modo se non ci sono più stringe '''
             del text['posizione_iniz'][i-1], text['testinohtml'][i - 1]

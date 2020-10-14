@@ -82,35 +82,18 @@ class Ui_self(QtWidgets.QMainWindow):
             
             if len(self.currentTitleJSON['posizione_iniz']) == 0:
                 ''' in caso sia il primo testo che appende '''
-                self.temp = {
-                    'testinohtml': [],
-                    'posizione_iniz': [],
-                    'testi': [] 
-                }
-
-                self.temp['testi'].append(text)
-                self.temp['testinohtml'].append(self.editor.toPlainText())
-                self.temp['posizione_iniz'].append(audio)
+                self.currentTitleJSON['testi'].append(text)
+                self.currentTitleJSON['testinohtml'].append(self.editor.toPlainText())
+                self.currentTitleJSON['posizione_iniz'].append(audio)
                 
                 return False
 
 
-            elif audio != self.currentTitleJSON['posizione_iniz'][-1]:
-                ''' se si entra nel secondo dopo, va fatto l'elemento precedente'''
-                #boolVariable = True
-                self.temp = data.spacchetta(self.temp)
-                self.currentTitleJSON['posizione_iniz'].append(self.temp['posizione_iniz'])
-                self.currentTitleJSON['testinohtml'].append(self.temp['testinohtml'])
-                self.currentTitleJSON['testi'].append(self.temp['testi'])
-
-                self.temp = {
-                    'testinohtml': [],
-                    'posizione_iniz': [],
-                    'testi': [] 
-                }
-
+            #elif audio != self.currentTitleJSON['posizione_iniz'][-1]:
+            #    ''' se si entra nel secondo dopo, va fatto l'elemento precedente'''
+            #    boolVariable = True
             #else:
-                #boolVariable = False
+            #    boolVariable = False
 
                 
             if float(self.currentTitleJSON['versione']) == 1.0:
@@ -119,14 +102,14 @@ class Ui_self(QtWidgets.QMainWindow):
 
             elif float(self.currentTitleJSON['versione']) >= 1.1:
                 ''' vecchia struttura dati -> nuova struttura dati implementa .append per ogni modifica'''
-                #self.currentTitleJSON['testi'].append(text)
-                #self.currentTitleJSON['testinohtml'].append(self.editor.toPlainText())
-                #self.currentTitleJSON['posizione_iniz'].append(audio)
-                self.temp['testi'].append(text)
-                self.temp['testinohtml'].append(self.editor.toPlainText())
-                self.temp['posizione_iniz'].append(audio)
+                if not self.currentTitleJSON['testi']:
+                    ## if it is empty
+                    self.currentTitleJSON['testi'].append(text)
+                else:
+                    self.currentTitleJSON['testi'][0] = text
 
-
+                self.currentTitleJSON['testinohtml'].append(self.editor.toPlainText())
+                self.currentTitleJSON['posizione_iniz'].append(audio)
 
 
             self.currentFile = 0
@@ -1023,13 +1006,15 @@ class Ui_self(QtWidgets.QMainWindow):
         self.indice = arg[2]
         self.currentTitle = [3]
 
-
         print(self.path)
+        
+        [256, 512] # chunk_size ORIGINAL: 1024
+        [] # rate ORIGINAL: 44100
 
         self.THRESHOLD = 500
-        self.CHUNK_SIZE = 1024
+        self.CHUNK_SIZE = 256
         self.FORMAT = pyaudio.paInt16
-        self.RATE = 44100
+        self.RATE = 4000
 
         print("record")
         self.audio = pyaudio.PyAudio()
@@ -1286,13 +1271,13 @@ class Ui_self(QtWidgets.QMainWindow):
         self.registrazione_ = False
 
         ''' per la nuova struttura dati ''' 
-        self.temp = data.spacchetta(self.temp)
-        self.currentTitleJSON['posizione_iniz'].append(self.temp['posizione_iniz'])
-        self.currentTitleJSON['testinohtml'].append(self.temp['testinohtml'])
-        self.currentTitleJSON['testi'].append(self.temp['testi'])
+        #self.temp = data.spacchetta(self.temp)
+        #self.currentTitleJSON['posizione_iniz'].append(self.temp['posizione_iniz'])
+        #self.currentTitleJSON['testinohtml'].append(self.temp['testinohtml'])
+        #self.currentTitleJSON['testi'].append(self.temp['testi'])
 
         ''' vecchia struttura dati ''' 
-        #self.currentTitleJSON = data.spacchetta(self.currentTitleJSON)
+        self.currentTitleJSON = data.spacchetta(self.currentTitleJSON)
 
     def setVolume(self, c):
         self.player.setVolume(c)
@@ -1316,7 +1301,7 @@ class Ui_self(QtWidgets.QMainWindow):
             for x in path_:
                 pathFolder += x + "/"
             del path_
-
+            
         self.setObjectName("self")
         self.resize(830, 675)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)

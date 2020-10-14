@@ -78,21 +78,30 @@ def spacchettamento(text) -> dict:
         i = 1
         lunghezza = len(text['testinohtml'])
         while i < lunghezza:
+            ''' fa scorrere tutte le stringhe '''
             k = 0
-            while k < len(text['testinohtml'][i-1]) and k < len(text['testinohtml'][i]):
-                if text['testinohtml'][i][k] != text['testinohtml'][i-1][k] and k != len(text['testinohtml'][i-1]):
-                    text['testinohtml'][i-1] = text['testinohtml'][i-1][:k] + text['testinohtml'][i][k] + text['testinohtml'][i-1][k:]
-                    break
+            if len(text['testinohtml'][i]) > len(text['testinohtml'][i - 1]):
+                ''' deve sistemare la stringa se e solo se quella dopo, all'interno della lista è più lunga, altrimenti vuol dire che è  '''
+                while k < len(text['testinohtml'][i-1]) and k < len(text['testinohtml'][i]):
+                    if text['testinohtml'][i][k] != text['testinohtml'][i-1][k] and k != len(text['testinohtml'][i-1]):
+                        text['testinohtml'][i-1] = text['testinohtml'][i-1][:k] + text['testinohtml'][i][k] + text['testinohtml'][i-1][k:]
+                        break
 
-                k += 1
+                    k += 1
+
+            elif len(text['testinohtml'][i]) != len(text['testinohtml'][i - 1]):
+                ''' parte della funzione funzione che gestisce di correggere l'eliminazione di testo in mezzo '''
+                while k < len(text['testinohtml'][i-1]) and k < len(text['testinohtml'][i]):
+                    if text['testinohtml'][i][k] != text['testinohtml'][i-1][k] and k != len(text['testinohtml'][i-1]):
+                        text['testinohtml'][i-1] = text['testinohtml'][i-1][:k-1] + text['testinohtml'][i-1][k+1:]
+                        break
+
+                    k += 1
 
             i += 1
 
     ''' parte di funzione che aggiusta in caso di modifica al termina della stringa '''
-    while True:
-        if check1(text['testinohtml']):
-            break
-
+    while not check1(text['testinohtml']):
         i = 1
 
         lunghezza = len(text['testinohtml'])

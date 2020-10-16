@@ -1277,7 +1277,7 @@ class Ui_self(QtWidgets.QMainWindow):
         #self.currentTitleJSON['testi'].append(self.temp['testi'])
 
         ''' vecchia struttura dati ''' 
-        #self.currentTitleJSON = data.spacchetta(self.currentTitleJSON)
+        self.currentTitleJSON = data.spacchetta(self.currentTitleJSON)
 
     def setVolume(self, c):
         self.player.setVolume(c)

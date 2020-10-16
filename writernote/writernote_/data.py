@@ -4,7 +4,7 @@ def checkInserimento(stringa: str) -> bool:
     ''' controlla che ogni stringa sia contenuta in quella successiva '''
     i = 0
     lunghezza = len(stringa) - 1
-    print("checkInserimento start")
+    #print("checkInserimento start")
     while i < lunghezza:
         lencompare = len(stringa[i+1]) - len(stringa[i])
         #if lencompare > 0 and stringa[i][:lencompare] == stringa[i][:lencompare]: 
@@ -84,46 +84,53 @@ def spacchettamento(text) -> dict:
 
     ''' parte della funzione che aggiusta gli inserimenti di testo all'interno di una frase [e non alla fine] '''
     print("primowhile start")
-    while not checkInserimento(text['testinohtml']):
-        i = 1
-        lunghezza = len(text['testinohtml'])
-        while i < lunghezza:
-            ''' fa scorrere tutte le stringhe '''
+    i = 1
+    lunghezzaLista = len(text['testinohtml'])
+    while i < lunghezzaLista:
+        while not checkInserimento(text['testinohtml'][:i]):
+            ''' in questo modo sistema tutte le stringhe fino a quella considerata in quel momento '''
+            for j in range(1, i+1):
+                if len(text['testinohtml'][j]) > len(text['testinohtml'][j - 1]):###FUNZIONA
+                    ''' deve sistemare la stringa se e solo se quella dopo, all'interno della lista è più lunga, altrimenti vuol dire che è  '''
+                    k = 0
+                    while k < len(text['testinohtml'][j-1]) and k < len(text['testinohtml'][j]):
+                        if text['testinohtml'][j][k] != text['testinohtml'][j-1][k] and k != len(text['testinohtml'][j-1]):
+                            #print("\nIN TO CULO")
+                            #print("STRINGA-1:     ", text['testinohtml'][j-1], "\nSTRINGADUE:     "+text['testinohtml'][j])
+                            text['testinohtml'][j-1] = text['testinohtml'][j-1][:k] + text['testinohtml'][j][k] + text['testinohtml'][j-1][k:]
+                                
+                            #print("STRINGA-1 DOPO:", text['testinohtml'][j-1], "\nSTRINGADUEDOPO: "+text['testinohtml'][j])
+                            
+                            break
 
-            k = 0
-            if len(text['testinohtml'][i]) > len(text['testinohtml'][i - 1]):###FUNZIONA
-                ''' deve sistemare la stringa se e solo se quella dopo, all'interno della lista è più lunga, altrimenti vuol dire che è  '''
-                while k < len(text['testinohtml'][i-1]) and k < len(text['testinohtml'][i]):
-                    if text['testinohtml'][i][k] != text['testinohtml'][i-1][k] and k != len(text['testinohtml'][i-1]):
-                        print("\nIN TO CULO")
-                        print("STRINGA-1: ", text['testinohtml'][i-1], "\nSTRINGADUE: "+text['testinohtml'][i])
-                        text['testinohtml'][i-1] = text['testinohtml'][i-1][:k] + text['testinohtml'][i][k] + text['testinohtml'][i-1][k:]
+                        k += 1
+                
+                elif len(text['testinohtml'][j]) <= len(text['testinohtml'][j - 1]):
+                    ''' parte della funzione funzione che gestisce di correggere l'eliminazione di testo in mezzo '''
+                    k = 0
+                    while k < len(text['testinohtml'][j-1]) and k < len(text['testinohtml'][j]):
+                        #print("entra nel ciclo")
+                        if text['testinohtml'][j][k] != text['testinohtml'][j-1][k]:
+                            #print("\nSTOCAZZO")
+                            #print("STRINGA-1:     ", text['testinohtml'][j-1], "\nSTRINGADUE:     "+text['testinohtml'][j])
+                            #print(j)                            
+                            #print(text['testinohtml'][j-1][:k])
+                            #print(text['testinohtml'][j][:k])
                         
-                        print("STRINGA-1 DOPO: ", text['testinohtml'][i-1], "\nSTRINGADUEDOPO: "+text['testinohtml'][i])
+                            text['testinohtml'][j-1] = text['testinohtml'][j-1][:k] + text['testinohtml'][j-1][k+1:]
+                            
+                            #print("STRINGA-1 DOPO:", text['testinohtml'][j-1], "\nSTRINGADUEDOPO: "+text['testinohtml'][j])
+
+                            break
                         
-                        break
+                        k += 1
 
-                    k += 1
-
-            elif len(text['testinohtml'][i]) != len(text['testinohtml'][i - 1]):
-                ''' parte della funzione funzione che gestisce di correggere l'eliminazione di testo in mezzo '''
-                while k < len(text['testinohtml'][i-1]) and k < len(text['testinohtml'][i]):
-                    if text['testinohtml'][i][k] != text['testinohtml'][i-1][k] and k != len(text['testinohtml'][i-1]):
-                        print("\nSTOCAZZO")
-                        print("STRINGA-1: ", text['testinohtml'][i-1], "\nSTRINGADUE: "+text['testinohtml'][i])
-                        text['testinohtml'][i-1] = text['testinohtml'][i-1][:k] + text['testinohtml'][i-1][k+1:]
-                        
-                        print("STRINGA-1 DOPO: ", text['testinohtml'][i-1], "\nSTRINGADUEDOPO: "+text['testinohtml'][i])
-
-                        break
-                    
-                    k += 1
-
-            i += 1
+        ''' aumenta il range della lista per il controllo '''
+        i += 1
     
-    print("primowhile stop")
+    #print("primowhile stop")
 
-    print("secondowhile start")
+    #print("secondowhile start")
     ''' parte di funzione che aggiusta in caso di modifica al termina della stringa '''
     while not check1(text['testinohtml']):
         i = 1
@@ -152,7 +159,7 @@ def spacchetta(text: dict) -> dict:
         text = json.load(text)
 
     text = spacchettamento(text)
-    print("eliminazioneNFrasi start")
+    #print("eliminazioneNFrasi start")
     text = eliminazioneNFrasi(text)
     
 
@@ -169,7 +176,7 @@ if __name__ == '__main__':
     with open("/home/giacomo/Scrivania/temp", 'w') as fileciao:
         fileciao.writelines("prima\n")
         for x in fileC['testinohtml']:
-            fileciao.writelines("\n\n\n\n" + x)
+            fileciao.writelines("\n" + x)
     
     stringa = spacchetta(fileC)
 

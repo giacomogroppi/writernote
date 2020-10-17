@@ -7,6 +7,8 @@ import os
 
 import json
 
+from writernote_ import table, find, wordcount
+
 import threading, subprocess, multiprocessing
 
 import sys
@@ -1503,8 +1505,8 @@ class Ui_self(QtWidgets.QMainWindow):
         self.toolBar.addAction(self.video_import)
 
         ''' style for the text '''
-        self.style_toolbar = QToolBar("Style")
-        self.style_toolbar.setIconSize(QSize(20, 20))
+        self.style_toolbar = QtWidgets.QToolBar("Style")
+        self.style_toolbar.setIconSize(QtCore.QSize(20, 20))
         self.addToolBar(self.style_toolbar)
 
         self.boldAction = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', "bold.png")),"Bold",self)
@@ -1512,18 +1514,32 @@ class Ui_self(QtWidgets.QMainWindow):
         self.boldAction.triggered.connect(self.bold)
         self.style_toolbar.addAction(self.boldAction)
 
+        ## table
+        self.tableAction = QtWidgets.QAction(QtGui.QIcon("images/table.png"),"Insert table",self)
+        self.tableAction.setStatusTip("Insert table")
+        self.tableAction.setShortcut("Ctrl+T")
+        self.tableAction.triggered.connect(table.Table(self).show)
+
+        # We need our own context menu for tables
+        self.editor.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.editor.customContextMenuRequested.connect(self.context)
+
+        # aggiunta alla finestra
+        self.style_toolbar.addAction(self.tableAction)
+
+
         # defining the toolbar
         self.edit_toolbar = QtWidgets.QToolBar("Edit")
-        self.edit_toolbar.setIconSize(QSize(20, 20))
+        self.edit_toolbar.setIconSize(QtCore.QSize(20, 20))
         self.addToolBar(self.edit_toolbar)
         self.edit_menu = self.menuBar().addMenu("&Edit")
 
-        self.undo_action = QtWidgets.QAction(QIcon(os.path.join(pathFolder + 'images', 'arrow-curve-180-left.png')), "Undo", self)
+        self.undo_action = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'arrow-curve-180-left.png')), "Undo", self)
         self.undo_action.setStatusTip("Undo last change")
         self.undo_action.triggered.connect(self.editor.undo)
         self.edit_menu.addAction(self.undo_action)
 
-        self.redo_action = QtWidgets.QAction(QIcon(os.path.join(pathFolder + 'images', 'arrow-curve.png')), "Redo", self)
+        self.redo_action = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'arrow-curve.png')), "Redo", self)
         self.redo_action.setStatusTip("Redo last change")
         self.redo_action.triggered.connect(self.editor.redo)
         self.edit_toolbar.addAction(self.redo_action)
@@ -1531,32 +1547,32 @@ class Ui_self(QtWidgets.QMainWindow):
 
         self.edit_menu.addSeparator()
 
-        self.cut_action = QtWidgets.QAction(QIcon(os.path.join(pathFolder + 'images', 'scissors.png')), "Cut", self)
+        self.cut_action = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'scissors.png')), "Cut", self)
         self.cut_action.setStatusTip("Cut selected text")
         self.cut_action.triggered.connect(self.cutFunction)
         self.edit_toolbar.addAction(self.cut_action)
         self.edit_menu.addAction(self.cut_action)
 
-        copy_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'document-copy.png')), "Copy", self)
+        copy_action = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'document-copy.png')), "Copy", self)
         copy_action.setStatusTip("Copy selected text")
         #copy_action.triggered.connect(self.editor.copy)
         self.edit_toolbar.addAction(copy_action)
         self.edit_menu.addAction(copy_action)
 
-        paste_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'clipboard-paste-document-text.png')), "Paste", self)
+        paste_action = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'clipboard-paste-document-text.png')), "Paste", self)
         paste_action.setStatusTip("Paste from clipboard")
         #paste_action.triggered.connect(self.editor.paste)
         self.edit_toolbar.addAction(paste_action)
         self.edit_menu.addAction(paste_action)
 
-        select_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'selection-input.png')), "Select all", self)
+        select_action = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'selection-input.png')), "Select all", self)
         select_action.setStatusTip("Select all text")
         #select_action.triggered.connect(self.editor.selectAll)
         self.edit_menu.addAction(select_action)
 
         self.edit_menu.addSeparator()
 
-        wrap_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'arrow-continue.png')), "Wrap text to window", self)
+        wrap_action = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'arrow-continue.png')), "Wrap text to window", self)
         wrap_action.setStatusTip("Toggle wrap text to window")
         wrap_action.setCheckable(True)
         wrap_action.setChecked(True)
@@ -1565,7 +1581,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
 
         self.Audio_toolbar = QToolBar("Edit")
-        self.Audio_toolbar.setIconSize(QSize(20, 20))
+        self.Audio_toolbar.setIconSize(QtCore.QSize(20, 20))
         self.addToolBar(self.Audio_toolbar)
 
         self.Audio_option_menu = self.menuBar().addMenu("&Audio Option")
@@ -1573,32 +1589,32 @@ class Ui_self(QtWidgets.QMainWindow):
         # definizione del qthread per il riascolto dell'audio
         #self.threadpool = QThreadPool()
 
-        self.riascoltoAudio = QAction(QIcon(os.path.join(pathFolder + 'images', 'manoIcon.png')), "Listen current audio", self)
+        self.riascoltoAudio = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'manoIcon.png')), "Listen current audio", self)
         self.riascoltoAudio.setStatusTip("List audio of the copybook")
         self.riascoltoAudio.triggered.connect(self.riascolto_Audio)
         self.Audio_option_menu.addAction(self.riascoltoAudio)
         self.Audio_toolbar.addAction(self.riascoltoAudio)
 
 
-        self.deleteAudio_Button = QAction(QIcon(os.path.join(pathFolder + 'images', 'deleteAudio.png')), "Delete Audio and Text", self)
+        self.deleteAudio_Button = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'deleteAudio.png')), "Delete Audio and Text", self)
         self.deleteAudio_Button.setStatusTip("Delete copybook")
         self.deleteAudio_Button.triggered.connect(self.deleteAudio_Function)
         self.Audio_option_menu.addAction(self.deleteAudio_Button)
         self.Audio_toolbar.addAction(self.deleteAudio_Button)
 
-        self.deleteCopyBook = QAction(QIcon(os.path.join(pathFolder + 'images', 'deleteCopyBook.png')), "Delete Audio and Text", self)
+        self.deleteCopyBook = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'deleteCopyBook.png')), "Delete Audio and Text", self)
         self.deleteCopyBook.setStatusTip("Delete copybook")
         self.deleteCopyBook.triggered.connect(self.deleteCopyBookFunction)
         self.Audio_option_menu.addAction(self.deleteCopyBook)
         self.Audio_toolbar.addAction(self.deleteCopyBook)
 
-        self.NewAudio = QAction(QIcon(os.path.join(pathFolder + 'images', 'newFile.png')), "Create new 'copybook'", self)
+        self.NewAudio = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'newFile.png')), "Create new 'copybook'", self)
         self.NewAudio.triggered.connect(self.newCopyBook)
         self.Audio_option_menu.addAction(self.NewAudio)
         self.Audio_toolbar.addAction(self.NewAudio)
 
         """ Botton to convert audio into text """
-        self.convertAudio = QAction(QIcon(os.path.join(pathFolder + 'images', 'text-speech.png')), "Convert the audio of the copybook into text", self)
+        self.convertAudio = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'text-speech.png')), "Convert the audio of the copybook into text", self)
         self.convertAudio.triggered.connect(self.convertAudioToText)
         self.Audio_option_menu.addAction(self.convertAudio)
         self.Audio_toolbar.addAction(self.convertAudio)
@@ -1648,6 +1664,108 @@ class Ui_self(QtWidgets.QMainWindow):
         self.updateList_()
 
         print(self.indice)
+
+
+    # for insert the table
+    def context(self,pos):
+
+        # Grab the cursor
+        cursor = self.text.textCursor()
+
+        # Grab the current table, if there is one
+        table = cursor.currentTable()
+
+        # Above will return 0 if there is no current table, in which case
+        # we call the normal context menu. If there is a table, we create
+        # our own context menu specific to table interaction
+        if table:
+
+            menu = QtGui.QMenu(self)
+
+            appendRowAction = QtWidgets.QAction("Append row",self)
+            appendRowAction.triggered.connect(lambda: table.appendRows(1))
+
+            appendColAction = QtWidgets.QAction("Append column",self)
+            appendColAction.triggered.connect(lambda: table.appendColumns(1))
+
+
+            removeRowAction = QtWidgets.QAction("Remove row",self)
+            removeRowAction.triggered.connect(self.removeRow)
+
+            removeColAction = QtWidgets.QAction("Remove column",self)
+            removeColAction.triggered.connect(self.removeCol)
+
+
+            insertRowAction = QtWidgets.QAction("Insert row",self)
+            insertRowAction.triggered.connect(self.insertRow)
+
+            insertColAction = QtWidgets.QAction("Insert column",self)
+            insertColAction.triggered.connect(self.insertCol)
+
+
+            mergeAction = QtWidgets.QAction("Merge cells",self)
+            mergeAction.triggered.connect(lambda: table.mergeCells(cursor))
+
+            # Only allow merging if there is a selection
+            if not cursor.hasSelection():
+                mergeAction.setEnabled(False)
+
+
+            splitAction = QtWidgets.QAction("Split cells",self)
+
+            cell = table.cellAt(cursor)
+
+            # Only allow splitting if the current cell is larger
+            # than a normal cell
+            if cell.rowSpan() > 1 or cell.columnSpan() > 1:
+
+                splitAction.triggered.connect(lambda: table.splitCell(cell.row(),cell.column(),1,1))
+
+            else:
+                splitAction.setEnabled(False)
+
+
+            menu.addAction(appendRowAction)
+            menu.addAction(appendColAction)
+
+            menu.addSeparator()
+
+            menu.addAction(removeRowAction)
+            menu.addAction(removeColAction)
+
+            menu.addSeparator()
+
+            menu.addAction(insertRowAction)
+            menu.addAction(insertColAction)
+
+            menu.addSeparator()
+
+            menu.addAction(mergeAction)
+            menu.addAction(splitAction)
+
+            # Convert the widget coordinates into global coordinates
+            pos = self.mapToGlobal(pos)
+
+            # Add pixels for the tool and formatbars, which are not included
+            # in mapToGlobal(), but only if the two are currently visible and
+            # not toggled by the user
+
+            if self.toolbar.isVisible():
+                pos.setY(pos.y() + 45)
+
+            if self.formatbar.isVisible():
+                pos.setY(pos.y() + 45)
+                
+            # Move the menu to the new position
+            menu.move(pos)
+
+            menu.show()
+
+        else:
+
+            event = QtGui.QContextMenuEvent(QtGui.QContextMenuEvent.Mouse,QtCore.QPoint())
+
+            self.text.contextMenuEvent(event)
 
 
     def bold(self):

@@ -1527,6 +1527,13 @@ class Ui_self(QtWidgets.QMainWindow):
         # aggiunta alla finestra
         self.style_toolbar.addAction(self.tableAction)
 
+        # image
+        self.imageAction = QtWidgets.QAction(QtGui.QIcon("images/image.png"),"Insert image",self)
+        self.imageAction.setStatusTip("Insert image")
+        self.imageAction.setShortcut("Ctrl+Shift+I")
+        self.imageAction.triggered.connect(self.insertImage)
+        self.style_toolbar.addAction(self.imageAction)
+
 
         # defining the toolbar
         self.edit_toolbar = QtWidgets.QToolBar("Edit")
@@ -1553,13 +1560,13 @@ class Ui_self(QtWidgets.QMainWindow):
         self.edit_toolbar.addAction(self.cut_action)
         self.edit_menu.addAction(self.cut_action)
 
-        copy_action = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'document-copy.png')), "Copy", self)
+        copy_action = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'document-copy.png')), "Copy", self)
         copy_action.setStatusTip("Copy selected text")
         #copy_action.triggered.connect(self.editor.copy)
         self.edit_toolbar.addAction(copy_action)
         self.edit_menu.addAction(copy_action)
 
-        paste_action = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'clipboard-paste-document-text.png')), "Paste", self)
+        paste_action = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'clipboard-paste-document-text.png')), "Paste", self)
         paste_action.setStatusTip("Paste from clipboard")
         #paste_action.triggered.connect(self.editor.paste)
         self.edit_toolbar.addAction(paste_action)
@@ -1664,6 +1671,34 @@ class Ui_self(QtWidgets.QMainWindow):
         self.updateList_()
 
         print(self.indice)
+
+    # image
+    def insertImage(self):
+        print("insertImage")
+        # Get image file name
+        #PYQT5 Returns a tuple in PyQt5
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, 'Insert image',".","Images (*.png *.xpm *.jpg *.bmp *.gif)")[0]
+
+        if filename:
+            
+            # Create image object
+            image = QtGui.QImage(filename)
+
+            # Error if unloadable
+            if image.isNull():
+
+                popup = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Critical,
+                                          "Image load error",
+                                          "Could not load image file!",
+                                          QtWidgets.QMessageBox.Ok,
+                                          self)
+                popup.show()
+
+            else:
+
+                cursor = self.editor.textCursor()
+
+                cursor.insertImage(image,filename)
 
 
     # for insert the table

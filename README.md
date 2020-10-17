@@ -36,12 +36,15 @@
     ```
 
     Install unstable version [last]
+    With multipass you can specify how many thread, ram, and disk, for the virtual machine for compilation.
+    Personaly i use 20 thread, 18G ram, and 100G of disk.
+
     ```bash
     sudo snap install multipass 
     sudo snap install snapcraft --classic
     git clone https://github.com/giacomogroppi/writernote.git
     cd writernote
-    multipass launch --name snapcraft-writernote 
+    multipass launch --name snapcraft-writernote --cpus 20 --mem 18G --disk 100G
     snapcraft
 
     sudo snap install writernote*.snap --devmode --dangerous

@@ -1,5 +1,5 @@
 name: writernote
-version: 0.2.1
+version: 0.2.2
 
 summary: Writernote
 
@@ -22,13 +22,9 @@ apps:
   writernote:
     command-chain: ["snap/command-chain/alsa-launch"]
     command: bin/desktop-launch $SNAP/bin/writernote
-    #$SNAP/snap/command-chain/alsa-launch
-    # enviroment for core20
     environment:
-    #  #LD_LIBRARY_PATH: $SNAP/lib/python3.8/site-packages
       PYTHONPATH: $SNAP/lib/python3.8/site-packages:$SNAP/usr/lib/python3/dist-packages
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
-      #GTK_USE_PORTAL: 1
     
     plugs:
       #- alsa
@@ -80,10 +76,12 @@ plugs:
     interface: content
     target: $SNAP/data-dir/sounds
     default-provider: gtk-common-themes
-  qt551:
-    interface: content
-    target: $SNAP/qt551
-    default-provider: qt551
+
+  ### disable for arm64 and armhf 
+  #qt551:
+  #  interface: content
+  #  target: $SNAP/qt551
+  #  default-provider: qt551
   
 parts:
   alsa-mixin:
@@ -95,7 +93,6 @@ parts:
     stage-packages:
       - libasound2
       - libasound2-plugins
-
 
   writernote:
     after: [desktop-qt5, alsa-mixin]

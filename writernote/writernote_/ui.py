@@ -1515,7 +1515,7 @@ class Ui_self(QtWidgets.QMainWindow):
         self.style_toolbar.addAction(self.boldAction)
 
         ## table
-        self.tableAction = QtWidgets.QAction(QtGui.QIcon("images/table.png"),"Insert table",self)
+        self.tableAction = QtWidgets.QAction(QtGui.QIcon(pathFolder + "images/table.png"),"Insert table",self)
         self.tableAction.setStatusTip("Insert table")
         self.tableAction.setShortcut("Ctrl+T")
         self.tableAction.triggered.connect(table.Table(self).show)
@@ -1528,14 +1528,14 @@ class Ui_self(QtWidgets.QMainWindow):
         self.style_toolbar.addAction(self.tableAction)
 
         # image
-        self.imageAction = QtWidgets.QAction(QtGui.QIcon("images/image.png"),"Insert image",self)
+        self.imageAction = QtWidgets.QAction(QtGui.QIcon(pathFolder + "images/image.png"),"Insert image",self)
         self.imageAction.setStatusTip("Insert image")
         self.imageAction.setShortcut("Ctrl+Shift+I")
         self.imageAction.triggered.connect(self.insertImage)
         self.style_toolbar.addAction(self.imageAction)
 
         ''' lista '''
-        self.bulletAction = QtWidgets.QAction(QtGui.QIcon("images/bullet.png"),"Insert bullet List",self)
+        self.bulletAction = QtWidgets.QAction(QtGui.QIcon(pathFolder + "images/bullet.png"),"Insert bullet List",self)
         self.bulletAction.setStatusTip("Insert bullet list")
         self.bulletAction.setShortcut("Ctrl+Shift+B")
         self.bulletAction.triggered.connect(self.bulletList)
@@ -1543,7 +1543,6 @@ class Ui_self(QtWidgets.QMainWindow):
 
 
         ''' style of the text '''
-        ''' style for the text '''
         self.style_text = QtWidgets.QToolBar("Style")
         self.style_text.setIconSize(QtCore.QSize(20, 20))
         self.addToolBar(self.style_text)
@@ -1563,7 +1562,7 @@ class Ui_self(QtWidgets.QMainWindow):
         self.style_text.addWidget(self.fontSize)
 
 
-        self.fontColor = QtWidgets.QAction(QtGui.QIcon("images/font-color.png"),"Change font color",self)
+        self.fontColor = QtWidgets.QAction(QtGui.QIcon(pathFolder + "images/font-color.png"),"Change font color",self)
         self.fontColor.triggered.connect(self.fontColorChanged)
         self.style_text.addAction(self.fontColor)
 

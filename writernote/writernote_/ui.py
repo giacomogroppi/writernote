@@ -1534,6 +1534,41 @@ class Ui_self(QtWidgets.QMainWindow):
         self.imageAction.triggered.connect(self.insertImage)
         self.style_toolbar.addAction(self.imageAction)
 
+        ''' lista '''
+        self.bulletAction = QtWidgets.QAction(QtGui.QIcon("images/bullet.png"),"Insert bullet List",self)
+        self.bulletAction.setStatusTip("Insert bullet list")
+        self.bulletAction.setShortcut("Ctrl+Shift+B")
+        self.bulletAction.triggered.connect(self.bulletList)
+        self.style_toolbar.addAction(self.bulletAction)
+
+
+        ''' style of the text '''
+        ''' style for the text '''
+        self.style_text = QtWidgets.QToolBar("Style")
+        self.style_text.setIconSize(QtCore.QSize(20, 20))
+        self.addToolBar(self.style_text)
+
+        self.fontBox = QtWidgets.QFontComboBox(self)
+        self.fontBox.currentFontChanged.connect(lambda font: self.editor.setCurrentFont(font))
+
+        self.fontSize = QtWidgets.QSpinBox(self)
+
+        # Will display " pt" after each value
+        self.fontSize.setSuffix(" pt")
+
+        self.fontSize.valueChanged.connect(lambda size: self.editor.setFontPointSize(size))
+
+        self.fontSize.setValue(14)
+        self.style_text.addWidget(self.fontBox)
+        self.style_text.addWidget(self.fontSize)
+
+
+        self.fontColor = QtWidgets.QAction(QtGui.QIcon("images/font-color.png"),"Change font color",self)
+        self.fontColor.triggered.connect(self.fontColorChanged)
+        self.style_text.addAction(self.fontColor)
+
+
+
 
         # defining the toolbar
         self.edit_toolbar = QtWidgets.QToolBar("Edit")
@@ -1596,32 +1631,32 @@ class Ui_self(QtWidgets.QMainWindow):
         # definizione del qthread per il riascolto dell'audio
         #self.threadpool = QThreadPool()
 
-        self.riascoltoAudio = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'manoIcon.png')), "Listen current audio", self)
+        self.riascoltoAudio = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'manoIcon.png')), "Listen current audio", self)
         self.riascoltoAudio.setStatusTip("List audio of the copybook")
         self.riascoltoAudio.triggered.connect(self.riascolto_Audio)
         self.Audio_option_menu.addAction(self.riascoltoAudio)
         self.Audio_toolbar.addAction(self.riascoltoAudio)
 
 
-        self.deleteAudio_Button = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'deleteAudio.png')), "Delete Audio and Text", self)
+        self.deleteAudio_Button = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'deleteAudio.png')), "Delete Audio and Text", self)
         self.deleteAudio_Button.setStatusTip("Delete copybook")
         self.deleteAudio_Button.triggered.connect(self.deleteAudio_Function)
         self.Audio_option_menu.addAction(self.deleteAudio_Button)
         self.Audio_toolbar.addAction(self.deleteAudio_Button)
 
-        self.deleteCopyBook = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'deleteCopyBook.png')), "Delete Audio and Text", self)
+        self.deleteCopyBook = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'deleteCopyBook.png')), "Delete Audio and Text", self)
         self.deleteCopyBook.setStatusTip("Delete copybook")
         self.deleteCopyBook.triggered.connect(self.deleteCopyBookFunction)
         self.Audio_option_menu.addAction(self.deleteCopyBook)
         self.Audio_toolbar.addAction(self.deleteCopyBook)
 
-        self.NewAudio = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'newFile.png')), "Create new 'copybook'", self)
+        self.NewAudio = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'newFile.png')), "Create new 'copybook'", self)
         self.NewAudio.triggered.connect(self.newCopyBook)
         self.Audio_option_menu.addAction(self.NewAudio)
         self.Audio_toolbar.addAction(self.NewAudio)
 
         """ Botton to convert audio into text """
-        self.convertAudio = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'text-speech.png')), "Convert the audio of the copybook into text", self)
+        self.convertAudio = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'text-speech.png')), "Convert the audio of the copybook into text", self)
         self.convertAudio.triggered.connect(self.convertAudioToText)
         self.Audio_option_menu.addAction(self.convertAudio)
         self.Audio_toolbar.addAction(self.convertAudio)
@@ -1638,6 +1673,13 @@ class Ui_self(QtWidgets.QMainWindow):
 
         self.listwidget.doubleClicked.connect(self.on_clickMenuList)
         self.Audio_option_menu.addSeparator()
+
+    def bulletList(self):
+
+        cursor = self.editor.textCursor()
+
+        # Insert bulleted list
+        cursor.insertList(QtGui.QTextListFormat.ListDisc)
 
 
     def deleteCopyBookFunction(self, currentItem = None):
@@ -1671,6 +1713,15 @@ class Ui_self(QtWidgets.QMainWindow):
         self.updateList_()
 
         print(self.indice)
+
+    # color for text
+    def fontColorChanged(self):
+        print("fontColorChanged")
+        # Get a color from the text dialog
+        color = QtWidgets.QColorDialog.getColor()
+
+        # Set it as the new text color
+        self.editor.setTextColor(color)
 
     # image
     def insertImage(self):

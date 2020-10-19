@@ -656,24 +656,25 @@ class Ui_self(QtWidgets.QMainWindow):
         dlg.show()
 
     def scissionePATH(self, path):
-        path = path.split('/')
+        if self.system == 'linux':
+            path = path.split('/')
 
+            path_finale = ''
+            for x in path[:-1]:
+                if x != '': path_finale = path_finale + '/' +  x
 
-        path_finale = ''
-        for x in path[:-1]:
-            # print(path_finale)
-            if x != '': path_finale = path_finale + '/' +  x
+            self.path = path_finale
+            self.nameFile = path[-1]
+        
+        elif self.system == 'windows':
+            path = path.split('\\')
 
-        # in this case the path change and we need to moove the temp folder
-        #if self.path != path_finale:
-        #    print(self.path, self.temp_, path_finale)
+            path_finale = ''
+            for x in path[:-1]:
+                if x != '': path_finale = path_finale + '\\' +  x
 
-        #    shutil.move(self.path + "/" + self.temp_, path_finale + "/")
-
-        self.path = path_finale
-        #MyWindow.path = path_finale
-        self.nameFile = path[len(path)-1]
-
+            self.path = path_finale
+            self.nameFile = path[-1]
 
     def file_open(self, check = False):
 

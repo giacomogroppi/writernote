@@ -810,27 +810,42 @@ class Ui_self(QtWidgets.QMainWindow):
         if self.path is None: self.path = os.getcwd()
 
         if sys.platform == 'linux':
+            self.system = 'linux'
             if not os.path.isdir("/tmp/writernote"):
                 os.mkdir("/tmp/writernote")
 
         elif sys.platform == 'windows':
-            ''' it is not support windows for this application '''
-            raise OSError("Windows is not supported for this application")
+            self.system = 'windows'
+            import getpass
+            self.username = nomeutente
 
-        if self.temp_ is not None: return
+            nomeutente = getpass.getuser()
+
+            if not os.path.isdir("C:\\Users\\" + nomeutente + "\\AppData\\Local\\Temp\\writernote"):
+                os.mkdir("C:\\Users\\" + nomeutente + "\\AppData\\Local\\Temp\\writernote")
+
+        if self.temp_ is not None: return False
 
         variabile = 0
         while True:
-            if not os.path.exists("/tmp/writernote/temporaneo" + str(variabile)):
+            if self.system == 'linux':
+                path = "/tmp/writernote/temporaneo" + str(variabile)
+            
+            elif self.system == 'windows':
+                path = "C:\\Users\\" + nomeutente + "\\AppData\\Local\\Temp\\writernote\\" + str(variabile)
+
+            if not os.path.exists(path):
                 self.temp_ = 'temporaneo' + str(variabile)
                 #MyWindow.temp_ = '.temporaneo' + str(variabile)
                 break
             variabile = variabile + 1
 
+
+        if self.system == 'linux': path = "/tmp/writernote/" + self.temp_
+        elif self.system == 'windows': path = "C:\\Users\\" + nomeutente + "\\AppData\\Local\\Temp\\writernote\\" + str(variabile)
+
+        os.mkdir(path)
         del variabile
-
-        os.mkdir("/tmp/writernote/" + self.temp_)
-
 
     def NewFileComplite(self):
         """ crea una cartella completa con l'indice vuoto, senza settare il nome del file """

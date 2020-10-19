@@ -830,7 +830,7 @@ class Ui_self(QtWidgets.QMainWindow):
         while True:
             if self.system == 'linux':
                 path = "/tmp/writernote/temporaneo" + str(variabile)
-            
+                self.username = None
             elif self.system == 'windows':
                 path = "C:\\Users\\" + nomeutente + "\\AppData\\Local\\Temp\\writernote\\" + str(variabile)
 
@@ -842,7 +842,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
 
         if self.system == 'linux': path = "/tmp/writernote/" + self.temp_
-        elif self.system == 'windows': path = "C:\\Users\\" + nomeutente + "\\AppData\\Local\\Temp\\writernote\\" + str(variabile)
+        elif self.system == 'windows': path = "C:\\Users\\" + self.nomeutente + "\\AppData\\Local\\Temp\\writernote\\" + str(variabile)
 
         os.mkdir(path)
         del variabile
@@ -934,13 +934,27 @@ class Ui_self(QtWidgets.QMainWindow):
         """ salvataggio degli indici """
         self.indice['video_checksum'] = len(self.indice['file']['titolo'])
 
-        with open("/tmp/writernote/" + self.temp_ + "/indice.json", "w") as f:
+        if self.system == 'linux':
+            path = "/tmp/writernote/"
+            
+        elif self.system == 'windows':
+            path = "C:\\Users\\" + self.nomeutente + "\\AppData\\Local\\Temp\\writernote\\"
+
+
+        with open(path + self.temp_ + "/indice.json", "w") as f:
             json.dump(self.indice, f)
 
         if self.currentTitle is not None:
             posizione = self.indice['file']['titolo'].index(self.currentTitle)
+            
+            if self.system == 'linux':
+                path = "/tmp/writernote/" + self.temp_ + "/" + self.indice['file']['file_testo'][posizione] + ".json"
+            
+            elif self.system == 'windows':
+                path = "C:\\Users\\" + self.nomeutente + "\\AppData\\Local\\Temp\\writernote\\" + self.temp_ + "\\" + self.indice['file']['file_testo'][posizione] + ".json"
 
-            with open("/tmp/writernote/" + self.temp_ + "/" + self.indice['file']['file_testo'][posizione] + ".json", "w") as c:
+
+            with open(path, "w") as c:
                 if self.registrazione_: self.stopRecording()
 
                 if not self.currentTitleJSON['se_registrato'] and len(self.currentTitleJSON['testi']) < 2:
@@ -948,7 +962,7 @@ class Ui_self(QtWidgets.QMainWindow):
                     self.currentTitleJSON['testi'] = [self.editor.toHtml()]
 
                 json.dump(self.currentTitleJSON, c)
-
+        
         if not zip_.compressFolder(self.path, self.temp_, self.nameFile):
             return self.dialog_critical("We had a problem, retry or check the log")
 

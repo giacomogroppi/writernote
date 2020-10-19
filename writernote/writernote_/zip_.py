@@ -41,14 +41,27 @@ def compressAll(path, temp_, nameFile):
         print(str(e))
         return False
 
-def compressFolder(path, temp_, nameFile):
+def compressFolder(path, temp_, nameFile, username = None):
+    if username is None:
+        ''' it means we are on linux  '''
+        pathtemp = "/tmp/writernote"
+    else:
+        pathtemp = "C:\\Users\\" + username + "\\AppData\\Local\\Temp\\writernote"
+
     try:
         import shutil
-        shutil.make_archive(path + "/" + nameFile, 'zip', "/tmp/writernote/" + temp_)
+        if username is None: 
+            print(path + "/" + nameFile, 'zip', pathtemp + "/" + temp_)
+            shutil.make_archive(path + "/" + nameFile, 'zip', pathtemp + "/" + temp_)
+            base = os.path.splitext(path + "/" + nameFile)[0]
+            os.rename(path + "/" + nameFile + ".zip", base + ".writer")
+        
+        else: 
+            shutil.make_archive(pathtemp + "\\" + nameFile, 'zip', pathtemp + temp_)
+            base = os.path.splitext(path + "\\" + nameFile)[0]
+            os.rename(path + "\\" + nameFile + ".zip", base + ".writer")
 
-        base = os.path.splitext(path + "/" + nameFile)[0]
-
-        os.rename(path + "/" + nameFile + ".zip", base + ".writer")
+        
 
         return True
     except PermissionError:

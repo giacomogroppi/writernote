@@ -22,12 +22,12 @@ class Rename(QtWidgets.QDialog):
         if not okPressed: return False
         if textTitle == '': return False
         if self.copybook == textTitle: return False
+        if self.parent.play_: return self.parent.dialog_critical("You can't modify the name right now")
+        if self.parent.registrazione_: return self.parent.dialog_critical("You can't change the name of the copybook while you are recording")
 
-        posizione = self.parent.indice['titolo'].index(self.copybook)
-        self.parent.indice[posizione] = textTitle
+        posizione = self.parent.indice['file']['titolo'].index(self.copybook)
+        
+        self.parent.indice['file'][posizione] = textTitle
         
         # update the window
-        self.parent.updateList_()
-
-        # need to save the file
-        return self.parent._save_to_path()
+        return self.parent.updateList_()

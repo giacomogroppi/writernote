@@ -497,7 +497,7 @@ class Ui_self(QtWidgets.QMainWindow):
         elif action == self.listwidget.renameCopybook:
             if not isinstance(currentItem, str): currentItem = currentItem.text()
             return rename.Rename(parent=self, copybook=currentItem)
-
+            
         elif action == self.listwidget.comprimiVideo:
 
             self.compressVideo(currentItem)

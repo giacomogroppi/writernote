@@ -11,6 +11,8 @@ from writernote_ import table, find, wordcount
 
 import threading, subprocess, multiprocessing
 
+from writernote_ import rename
+
 import sys
 import traceback
 
@@ -24,13 +26,6 @@ import wave
 from writernote_ import zip_, data
 import shutil
 from writernote_ import audio_decoder, audioRecoder
-
-
-#if not os.getcwd() == '/home/giacomo/appgroppi/writernote/writernote':
-#    os.system("$PATH")
-#    os.system("ls $SNAP/lib/python3.6/site-packages")
-#    sys.path.append(os.path.realpath("$SNAP/lib/python3.6/site-packages"))
-
 
 from PyQt5 import QtCore
 
@@ -469,21 +464,24 @@ class Ui_self(QtWidgets.QMainWindow):
         ### Funzione per gestire il tasto destro all'interno del menu del copybook
 
         if not os.path.exists("/tmp/writernote/" + self.temp_ + "/indice.json"):
-            return
+            return False
 
-
+        
         contextMenu = QtWidgets.QMenu(self.listwidget)
+        
 
         self.listwidget.addQuaderno = contextMenu.addAction("New")
         self.listwidget.deleteQuaderno = contextMenu.addAction("Del")
         self.listwidget.deleteAudio = contextMenu.addAction("Del audio")
         self.listwidget.comprimiVideo = contextMenu.addAction("Compress Video")
+        self.listwidget.renameCopybook = contextMenu.addAction("Rename")
         self.listwidget.convert_textAudio = contextMenu.addAction("Audio -> Text")
 
 
-
+        
         action = contextMenu.exec_(self.mapToGlobal(event.pos()))
         currentItem = self.listwidget.currentItem()
+        
 
         if currentItem is None: return
 
@@ -491,13 +489,15 @@ class Ui_self(QtWidgets.QMainWindow):
             self.newCopyBook()
 
         elif action == self.listwidget.deleteQuaderno:
-            self.deleteCopyBookFunction(currentItem)
+            self.deleteCopyBookFunction(currentItem=currentItem)
 
         elif action == self.listwidget.deleteAudio:
             self.deleteAudio_Function(currentItem=currentItem)
 
-
-
+        elif action == self.listwidget.renameCopybook:
+            if not isinstance(currentItem, str): currentItem = currentItem.text()
+            return rename.Rename(parent=self, copybook=currentItem)
+            
         elif action == self.listwidget.comprimiVideo:
 
             self.compressVideo(currentItem)
@@ -1755,7 +1755,7 @@ class Ui_self(QtWidgets.QMainWindow):
     def context(self,pos):
 
         # Grab the cursor
-        cursor = self.text.textCursor()
+        cursor = self.editor.textCursor()
 
         # Grab the current table, if there is one
         table = cursor.currentTable()

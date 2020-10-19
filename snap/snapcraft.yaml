@@ -1,5 +1,5 @@
 name: writernote
-version: 0.2.2
+version: 0.2.3
 
 summary: Writernote
 
@@ -8,7 +8,6 @@ description: |
   translate it later into text, and listen to it in an intelligent way.
 
 grade: stable
-#confinement: classic
 confinement: strict
 base: core20
 
@@ -27,7 +26,6 @@ apps:
       ALSA_CONFIG_PATH: /snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa/alsa.conf
     
     plugs:
-      #- alsa
       - desktop
       - desktop-legacy
       - wayland
@@ -96,7 +94,6 @@ parts:
 
   writernote:
     after: [desktop-qt5, alsa-mixin]
-    #after: [desktop-qt5]
     
     plugin: python
     source: .
@@ -293,12 +290,11 @@ parts:
       #- libortop9
     
     python-packages:
-      - setuptools #>=45.2.0
+      - setuptools
       - wheel
-      #- typing
       - pydub
       - SpeechRecognition
-      - psutil #>=5.7.2
+      - psutil
       - googletrans
       - nvpy
       - Wave

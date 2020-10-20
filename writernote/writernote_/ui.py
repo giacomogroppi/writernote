@@ -312,7 +312,14 @@ class Ui_self(QtWidgets.QMainWindow):
 
             elif check_ == QtWidgets.QMessageBox.Yes:
                 """ Salvataggio del file corrente """
-                with open("/tmp/writernote/" + self.temp_ + "/" + fileDaSalvare + ".json", "w") as f:
+                if self.system == 'linux':
+                    path = "/tmp/writernote/" + self.temp_ + "/" + fileDaSalvare + ".json"
+
+                elif self.system == 'windows':
+                    path = "C:\\Users\\" + self.username + "\\AppData\\Local\\Temp\\writernote\\" + self.temp_ + "\\" + fileDaSalvare + ".json"
+                
+
+                with open(path, "w") as f:
                     json.dump(self.currentTitleJSON, f)
 
         # Change the current title
@@ -323,7 +330,12 @@ class Ui_self(QtWidgets.QMainWindow):
         posizione = self.indice['file']['titolo'].index(self.currentTitle)
         fileDaCaricare = self.indice['file']['file_testo'][posizione]
 
-        with open("/tmp/writernote/" + self.temp_ + "/" + fileDaCaricare + ".json") as fileD:
+        if self.system == 'linux':
+            path = "/tmp/writernote/" + self.temp_ + "/" + fileDaCaricare + ".json"
+        elif self.system == 'windows':
+            path = "C:\\Users\\" + self.username + "\\AppData\\Local\\Temp\\writernote\\" + self.temp_ + "\\" + fileDaCaricare + ".json"
+
+        with open(path) as fileD:
             self.currentTitleJSON = json.load(fileD)
 
         # caricamento del testo
@@ -332,14 +344,9 @@ class Ui_self(QtWidgets.QMainWindow):
             self.editor.setHtml(self.currentTitleJSON['testi'][0])
 
         elif self.indice['file']['audio'][posizione]:
-            ''' vecchio formato '''
-            ##daCaricare_ = ''
-            ##for x in self.currentTitleJSON['testi']:
-            ##    daCaricare_ += x
-
             ''' nuovo formato '''
             daCaricare_ = self.currentTitleJSON['testi'][-1]
-
+            
             self.editor.setHtml(daCaricare_)
         else:
             print("on_clickmenulist else")
@@ -394,8 +401,6 @@ class Ui_self(QtWidgets.QMainWindow):
         """ Aggiornamento della lista """
         self.listwidget.clear()
 
-
-
         for i, x_ in enumerate(self.indice['file']['titolo']):
             if x_ is not None:
                 self.listwidget.insertItem(i, x_)
@@ -403,9 +408,11 @@ class Ui_self(QtWidgets.QMainWindow):
             else:
                 self.listwidget.insertItem(i, "No title")
 
+        if self.system == 'windows': path = "C:\\Users\\" + self.username + "\\AppData\\Local\\Temp\\writernote\\" + self.temp_ + '\\indice.json'
+        elif self.system == 'linux': path = "/tmp/writernote/" + self.temp_ + "/indice.json"
 
 
-        with open("/tmp/writernote/" + self.temp_ + "/indice.json", "w") as fileD:
+        with open(path, "w") as fileD:
             json.dump(self.indice, fileD)
 
 
@@ -650,9 +657,9 @@ class Ui_self(QtWidgets.QMainWindow):
         self.updateList_()
 
     def dialog_critical(self, s):
-        dlg = QMessageBox(self)
+        dlg = QtWidgets.QMessageBox(self)
         dlg.setText(s)
-        dlg.setIcon(QMessageBox.Critical)
+        dlg.setIcon(QtWidgets.QMessageBox.Critical)
         dlg.show()
 
     def scissionePATH(self, path):
@@ -690,7 +697,12 @@ class Ui_self(QtWidgets.QMainWindow):
 
             if not check: self.scissionePATH(path_)
 
-            if not os.path.exists(self.path + "/" + self.nameFile):
+            if self.system == 'linux':
+                pathTemp = self.path + '/' + self.nameFile
+            else:
+                pathTemp = self.path + '\\' + self.nameFile
+
+            if not os.path.exists(pathTemp):
                 return self.dialog_critical("The file didn't exist")
 
             if self.currentTitle is not None:
@@ -776,15 +788,14 @@ class Ui_self(QtWidgets.QMainWindow):
         else:
             self._save_to_path()
 
-    def file_saveas(self):
+    def file_saveas(self) -> None: # WINDOWS OK
         ''' save as '''
         if self.path is not None:
             position = self.path
         else:
-            position = b"/home/$USER"
-
-        print(position)
-        #path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save file", position, "Writernote (*.writer);; All file (*)")
+            if self.system == 'linux': position = b"/home/$USER"
+            else: position = "C:\\Users\\" + self.nomeutente
+        
         path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save file", position, "Writernote (*.writer);; All file (* *.*)", initialFilter='.writer')
 
         if path == '':
@@ -806,7 +817,7 @@ class Ui_self(QtWidgets.QMainWindow):
         print(self.path, self.temp_, self.nameFile)
         return self._save_to_path()
 
-    def createTempFolder_(self):
+    def createTempFolder_(self) -> None: # WINDOWS OK
         """ Viene eseguita la funzione appena il programma finisce di caricare """
         if self.path is None: self.path = os.getcwd()
 
@@ -815,15 +826,14 @@ class Ui_self(QtWidgets.QMainWindow):
             if not os.path.isdir("/tmp/writernote"):
                 os.mkdir("/tmp/writernote")
 
-        elif sys.platform == 'windows':
+        elif sys.platform == 'win32':
             self.system = 'windows'
             import getpass
-            self.username = nomeutente
 
-            nomeutente = getpass.getuser()
+            self.username = getpass.getuser()
 
-            if not os.path.isdir("C:\\Users\\" + nomeutente + "\\AppData\\Local\\Temp\\writernote"):
-                os.mkdir("C:\\Users\\" + nomeutente + "\\AppData\\Local\\Temp\\writernote")
+            if not os.path.isdir("C:\\Users\\" + self.username + "\\AppData\\Local\\Temp\\writernote"):
+                os.mkdir("C:\\Users\\" + self.username + "\\AppData\\Local\\Temp\\writernote")
 
         if self.temp_ is not None: return False
 
@@ -833,17 +843,16 @@ class Ui_self(QtWidgets.QMainWindow):
                 path = "/tmp/writernote/temporaneo" + str(variabile)
                 self.username = None
             elif self.system == 'windows':
-                path = "C:\\Users\\" + nomeutente + "\\AppData\\Local\\Temp\\writernote\\" + str(variabile)
+                path = "C:\\Users\\" + self.username + "\\AppData\\Local\\Temp\\writernote\\temporaneo" + str(variabile)
 
             if not os.path.exists(path):
                 self.temp_ = 'temporaneo' + str(variabile)
-                #MyWindow.temp_ = '.temporaneo' + str(variabile)
                 break
             variabile = variabile + 1
 
 
         if self.system == 'linux': path = "/tmp/writernote/" + self.temp_
-        elif self.system == 'windows': path = "C:\\Users\\" + self.nomeutente + "\\AppData\\Local\\Temp\\writernote\\" + str(variabile)
+        elif self.system == 'windows': path = "C:\\Users\\" + self.username + "\\AppData\\Local\\Temp\\writernote\\" + self.temp_
 
         os.mkdir(path)
         del variabile
@@ -856,7 +865,10 @@ class Ui_self(QtWidgets.QMainWindow):
             self.dialog_critical("You have already create a new book, to write something create a new copybook")
             return
 
-        with open("/tmp/writernote/" + self.temp_ + "/" + "indice.json", "w") as f:
+        if self.system == 'windows': path = "C:\\Users\\" + self.username + "\\AppData\\Local\\Temp\\writernote\\" + "indice.json"
+        elif self.system == 'linux': path = "/tmp/writernote/" + self.temp_ + "/" + "indice.json"
+
+        with open(path, "w") as f:
             f.write(str(self.indice).replace("False", "false").replace("None", "null"))
 
         self.NewAudio.setEnabled(True)
@@ -907,7 +919,10 @@ class Ui_self(QtWidgets.QMainWindow):
                 fileDaScrivere = json.load(default)
                 fileDaScrivere['audio_position_path'] = None
 
-        with open("/tmp/writernote/" + self.temp_ + "/" + nomeTemp + ".json", "w") as file_:
+        if self.system == 'windows': path = "C:\\Users\\" + self.username + "\\AppData\\Local\\Temp\\writernote\\" + nomeTemp +".json"
+        elif self.system == 'linux': path = "/tmp/writernote/" + self.temp_ + "/" + nomeTemp + ".json"
+
+        with open(path, "w") as file_:
             json.dump(fileDaScrivere, file_)
 
         self.editor.setHtml('')

@@ -11,7 +11,7 @@ from writernote_ import table, find, wordcount
 
 import threading, subprocess, multiprocessing
 
-from writernote_ import rename, savecopybook
+from writernote_ import rename, savecopybook, update
 
 import sys
 import traceback
@@ -67,6 +67,8 @@ class Ui_self(QtWidgets.QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(self)
 
         self.createTempFolder_()
+
+        update.updateWriternote(self)
 
     def cambiamenti_testo(self):
         """ Funzione che viene richiamata tutte le volte che durante qualcosa viene scritto qualcosa """
@@ -1313,7 +1315,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def startRecording(self):
         ''' manage the permission for snapcraft [audio-record] plug'''
-        permissionpath = 'permission.json'
+        permissionpath = 'config.json'
         try:
             with open(permissionpath) as permission:
                 permission = json.load(permission)
@@ -1325,7 +1327,7 @@ class Ui_self(QtWidgets.QMainWindow):
             path = '/'
             for x in path_:
                 path += x + "/"
-            permissionpath = path + "images/permission.json"
+            permissionpath = path + "images/config.json"
             with open(permissionpath) as permission:
                 permission = json.load(permission)
 

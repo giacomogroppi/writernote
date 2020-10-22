@@ -1428,11 +1428,9 @@ class Ui_self(QtWidgets.QMainWindow):
         self.horizontalLayout_5.setSpacing(6)
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
 
-
         # Creazione del QMediaPlayer()
         #self.player = QtMultimedia.QMediaPlayer()
         self.player = QtMultimedia.QMediaPlayer()
-
 
         print("buffer status __init__ : {}".format(self.player.bufferStatus()))
 
@@ -1519,8 +1517,6 @@ class Ui_self(QtWidgets.QMainWindow):
         self.timeSlider.setEnabled(False)
         self.volumeSlider.setEnabled(False)
 
-
-
         # Lista per i titoli
         self.listwidget = QtWidgets.QListWidget(self.centralWidget)
         self.listwidget.setEnabled(True)
@@ -1549,7 +1545,7 @@ class Ui_self(QtWidgets.QMainWindow):
         self.toolBar.addAction(new_menu_action)
 
 
-        self.open_file_action = QAction(QIcon(os.path.join(pathFolder + 'images', 'blue-folder-open-document.png')),"Open file...",self)
+        self.open_file_action = QtWidgets.QAction(QIcon(os.path.join(pathFolder + 'images', 'blue-folder-open-document.png')),"Open file...",self)
          # open file method
 
 
@@ -1564,7 +1560,7 @@ class Ui_self(QtWidgets.QMainWindow):
         self.file_menu.addAction(self.save_file_action)
         self.toolBar.addAction(self.save_file_action)
 
-        self.saveas_file_action = QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'disk--pencil.png')), "Save As...", self)
+        self.saveas_file_action = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'disk--pencil.png')), "Save As...", self)
         self.saveas_file_action.setStatusTip("Save current page to specified file")
         self.saveas_file_action.triggered.connect(self.file_saveas)
         self.file_menu.addAction(self.saveas_file_action)

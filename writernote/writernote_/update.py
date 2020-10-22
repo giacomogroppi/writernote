@@ -1,5 +1,4 @@
 import sys, json
-import requests
 from PyQt5 import QtWidgets
 
 import base64
@@ -24,7 +23,7 @@ class updateWriternote(QtWidgets.QDialog):
         numeroVersione = checkUpdate()
         if numeroVersione == 0:
             return True
-
+        
         check_ = QtWidgets.QMessageBox.question(self,
                 "Update",
                 "There are " + numeroVersione + " new updates for writernote, do I update?\nDo you want to open browser?",
@@ -70,6 +69,8 @@ def checkUpdate() -> int:
     #test = {"name":"config.json","path":"writernote/config.json","sha":"ca85f886934ebdb9be2b2b7fc6b28b359feb394d","size":26,"url":"https://api.github.com/repos/giacomogroppi/writernote/contents/writernote/config.json?ref=master","html_url":"https://github.com/giacomogroppi/writernote/blob/master/writernote/config.json","git_url":"https://api.github.com/repos/giacomogroppi/writernote/git/blobs/ca85f886934ebdb9be2b2b7fc6b28b359feb394d","download_url":"https://raw.githubusercontent.com/giacomogroppi/writernote/master/writernote/config.json","type":"file","content":"ewogICAgImF1ZGlvX2NodW5uZWwiOiAxCn0=\n","encoding":"base64","_links":{"self":"https://api.github.com/repos/giacomogroppi/writernote/contents/writernote/config.json?ref=master","git":"https://api.github.com/repos/giacomogroppi/writernote/git/blobs/ca85f886934ebdb9be2b2b7fc6b28b359feb394d","html":"https://github.com/giacomogroppi/writernote/blob/master/writernote/config.json"}}
     
     ''' check the update '''
+
+    import requests
     r = requests.get('https://api.github.com/repos/giacomogroppi/writernote/contents/writernote/config.json')
     
     try:

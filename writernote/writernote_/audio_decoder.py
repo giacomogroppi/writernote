@@ -40,16 +40,14 @@ class Video():
 
         language = 'it-IT'
         
-
-
-        src = self.temp_ + "/" + self.nameAudio
+        src = "/tmp/writernote/" + self.temp_ + "/" + self.nameAudio
         
         nomeTemp = str(datetime.now()).replace(" ", "").replace(":", "")
         c = 0
         while True:
-            if not os.path.exists(self.path + "/" + self.temp_ + "/" + nomeTemp + str(c)): break
+            if not os.path.exists("/tmp/writernote/" + self.temp_ + "/" + nomeTemp + str(c)): break
             c += 1
-        nomeTemp = self.path + "/" + self.temp_ + "/" + nomeTemp + str(c) + ".wav"
+        nomeTemp = "/tmp/writernote/" + self.temp_ + "/" + nomeTemp + str(c) + ".wav"
 
         """ Codifica il file in un formato in cui google non ha problemi a leggerlo """
         #print("ffmpeg -i " + src + " " + nomeTemp)
@@ -221,7 +219,7 @@ class Video():
             self.delAudio(nomeTemp)
             return False, 0
 
-        
+        return False, 0
 
     def scissione(self):
 
@@ -231,20 +229,20 @@ class Video():
         """
 
         import datetime
-        date = datetime.datetime.now()
-        date.replace(" ", "")
-
+        date = str(datetime.datetime.now())
+        date = date.replace(" ", "").replace("-", "")
+        print("date: ", date)
         i = 0
         while True:
-            if os.path.exists(self.temp_ + "/" + date + str(i)):
-                nome_Audio_temp = self.temp_ + date + str(i) + ".mp3"
+            if not os.path.exists(self.temp_ + "/" + date + str(i) + ".mp3"):
+                nome_Audio_temp = date + str(i) + ".mp3"
                 break
 
             i += 1
                 
-
+        print(nome_Audio_temp)
         # self.path in questo caso è il nome del file video
-        command_shell = "ffmpeg -i " + self.path + " -ab 600k -ac 2 -ar 44100 -vn " + nome_Audio_temp
+        command_shell = "ffmpeg -i " + self.path + " -ab 600k -ac 2 -ar 44100 -vn /tmp/writernote/" + self.temp_ + "/" + nome_Audio_temp + " -threads nproc"
 
         os.system(command_shell)
 

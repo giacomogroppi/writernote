@@ -313,28 +313,6 @@ class Ui_self(QtWidgets.QMainWindow):
         if not savecopybook.savecopybook(parent=self):
             ''' richiesta all'utente se vuole salvare il file '''
             return False
-            
-            #check_ = QtWidgets.QMessageBox.question(self,
-            #    "Save" + self.currentTitle,
-            #    "If you change the copybook the current Title were be saved\nDo you want to continue?",
-            #    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
-            #    )
-
-
-            #if check_ == QtWidgets.QMessageBox.Cancel:
-            #    return False
-
-            #elif check_ == QtWidgets.QMessageBox.Yes:
-            #    """ Salvataggio del file corrente """
-            #    if self.system == 'linux':
-            #        path = "/tmp/writernote/" + self.temp_ + "/" + fileDaSalvare + ".json"
-
-            #    elif self.system == 'windows':
-            #        path = "C:\\Users\\" + self.username + "\\AppData\\Local\\Temp\\writernote\\" + self.temp_ + "\\" + fileDaSalvare + ".json"
-                
-
-            #    with open(path, "w") as f:
-            #        json.dump(self.currentTitleJSON, f)
 
         # Change the current title
         self.currentTitle = self.listwidget.currentItem().text()
@@ -403,6 +381,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
         if self.system == 'linux':
             path = "/tmp/writernote/" + self.temp_ + "/" + self.indice['file']['audio'][posizione]
+
         elif self.system == 'windows':
             path = "C:\\Users\\" + self.username + "\\AppData\\Local\\Temp\\writernote\\" + self.temp_ + "\\" + self.indice['file']['audio'][posizione]
                 
@@ -648,8 +627,8 @@ class Ui_self(QtWidgets.QMainWindow):
             'mov',
             'mp4'
             ]
-
-        if not file_extension in possibleExtantion:
+        
+        if not file_extension[1:] in possibleExtantion:
             self.dialog_critical("Sorry I can't import the file extantion " + str(file_extension))
             return
 
@@ -667,13 +646,14 @@ class Ui_self(QtWidgets.QMainWindow):
             )
 
         """ Scissione """
-        audioName = video.scissione()
+        se, audioName = video.scissione()
+        if not se:
+            return self.dialog_critical("We had an internal problem")
 
         # Salva il nome dell'audio all'interno file audioName --> richiama poi l'aggiornamento dell'indice
         self.indice['file']['audio'][position] = audioName
 
-
-
+        self.convertAudio.setEnabled(True)
 
         self.updateList_()
 

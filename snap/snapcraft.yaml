@@ -75,12 +75,6 @@ plugs:
     target: $SNAP/data-dir/sounds
     default-provider: gtk-common-themes
 
-  ### disable for arm64 and armhf 
-  #qt551:
-  #  interface: content
-  #  target: $SNAP/qt551
-  #  default-provider: qt551
-  
 parts:
   alsa-mixin:
     plugin: dump
@@ -103,11 +97,8 @@ parts:
       - C_INCLUDE_PATH: /usr/include/python3.8/
 
     build-packages:
-      #- ffmpeg
-      #for qt
       - libxcb-xinerama0-dev
       - qt5-default
-      #- ^libxcb.*-dev
       - libx11-xcb-dev 
       - libglu1-mesa-dev 
       - libxrender-dev 

@@ -66,6 +66,7 @@ In case the program closes due to some problem, without compressing the `` .temp
 
 ## Development
 
-The application is entirely developed by Giacomo Groppi, and to become part of the development send an email to giamg01@gmail.com. To report a problem send an email to the same address [possible with the error log and with a photo].
+The application is entirely developed by Giacomo Groppi.
+For developing new features, write a Ticket, so others know what you are doing. For development create a fork, and use the test as base. Create a Pull request for each fix. Do not create big pull requests, as long as you don't break anything features also can be merged, even if they are not 100% finished.. To report a problem send an email to the same address [possible with the error log and with a photo].
 
 See [GitHub:writernote](http://github.com/giacomogroppi/writernote) for current development.

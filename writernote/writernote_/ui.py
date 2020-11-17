@@ -113,6 +113,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
             self.currentFile = 0
 
+    #ok qt
     def cambiamenti_selezione(self):
         """ if the user is listening to audio """
         if not self.play_: return False
@@ -138,6 +139,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
         print("text: {}\nposition:{}".format(text, position))
 
+    #ok qt
     def closeEvent(self, event):
         if self.play_:
             self.player.stop()
@@ -804,13 +806,7 @@ class Ui_self(QtWidgets.QMainWindow):
 
     def file_saveas(self) -> None: # WINDOWS OK
         ''' save as '''
-        if self.path is not None:
-            position = self.path
-        else:
-            if self.system == 'linux': position = b"/home/$USER"
-            else: position = "C:\\Users\\" + self.username
-        
-        path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save file", position, "Writernote (*.writer);; All file (* *.*)", initialFilter='.writer')
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save file", ".writer", "Writernote (*.writer);; All file (* *.*)", initialFilter='.writer')
 
         if path == '':
             return False
@@ -1719,6 +1715,7 @@ class Ui_self(QtWidgets.QMainWindow):
         self.Audio_option_menu.addAction(self.deleteCopyBook)
         self.Audio_toolbar.addAction(self.deleteCopyBook)
 
+        # newaudio funzione per il copybook
         self.NewAudio = QtWidgets.QAction(QtGui.QIcon(os.path.join(pathFolder + 'images', 'newFile.png')), "Create new 'copybook'", self)
         self.NewAudio.triggered.connect(self.newCopyBook)
         self.Audio_option_menu.addAction(self.NewAudio)
